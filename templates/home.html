@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>
+        {% block title %}Bem vindo{% endblock %}, {{ current_user.name }}.
+    </h2>
+
+    <button onclick="window.location.href='/account/logout'" class="btn btn-dark">Logout</button>
+    <button onclick="window.location.href='/account/profile'" class="btn btn-secondary">Profile</button>
+    <button onclick="window.location.href='/chamada/add_turma'" class="btn btn-secondary">Add turma</button>
+
+    <br><br>
+    <a href="/">Index</a>
+
+    <hr>
+    <br>
+
+    <table class="table">
+        <tr>
+            <th>Id</th>
+            <th>Turma</th>
+            {% if current_user.professor %}
+            <th>Action</th>
+            {% endif %}
+        </tr>
+        {% for t in turmas %}
+            <tr>
+                <td>{{ t.id }}</td>
+                <td>
+                    <a href="/chamada/chamada?turma_id={{ t.id }}">{{ t.name }}</a>
+                </td>
+                {% if current_user.professor %}
+                <td>
+                    <a href="/chamada/add_aluno?id_turma={{ t.id }}">Add aluno</a>
+                    <a href="/chamada/del_turma?id_turma={{ t.id }}">Remover Turma</a>
+                </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}

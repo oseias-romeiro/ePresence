@@ -6,14 +6,21 @@
     <form method="post" autocomplete="off">
         {{ form.csrf_token }}
 
-        {{ form.username.label }}<br>
-        {{ form.username }}<br>
+        {{ form.matricula.label }}<br>
+        {{ form.matricula }}<br>
+
+        {{ form.name.label }}<br>
+        {{ form.name }}<br>
 
         {{ form.password1.label }}<br>
         {{ form.password1 }}<br>
 
         {{ form.password2.label }}<br>
         {{ form.password2 }}<br>
+
+        {{ form.professor.label }}<br>
+        {{ form.professor }}<br>
+
         <br>
         <button class="btn btn-dark" type="submit">Edit</button>
         <a href="/account/home">

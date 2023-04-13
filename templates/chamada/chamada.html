@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>
+        {% block title %}Chamda{% endblock %} do dia: {{ dia }}
+    </h2>
+
+    <br><br>
+    <a href="/">Index</a>
+
+    <hr>
+    <br>
+
+    <table class="table">
+        <tr>
+            <th>Id</th>
+            <th>Matricula</th>
+            <th>Nome</th>
+        </tr>
+        {% for f in freq %}
+            <tr>
+                <td>{{ f.id }}</td>
+                <td>{{ f.matricula }}</td>
+                <td>{{ f.name }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}

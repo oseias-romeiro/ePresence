@@ -19,18 +19,18 @@ def sign_in():
     if form.validate_on_submit():
         sess = Session()
         user = sess.query(User).filter_by(
-            username=form.username.data
+            matricula=form.matricula.data
         ).first()
         sess.close()
 
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
-            return redirect(url_for("account_app.home"))
+            return redirect(url_for("chamada_app.home"))
         else:
-            flash("Incorrect username/password", "failed")
+            flash("Matricula/senha invalida", "failed")
             return redirect(url_for("account_app.sign_in"))
     else:
-        flash("Invalid security token", "failed")
+        flash("Token invalido", "failed")
         return redirect(url_for("account_app.sign_in"))
 
 
@@ -46,40 +46,25 @@ def sign_up():
                 raise Exception
 
             user = User(
-                username=form.username.data,
-                password=generate_password_hash(form.password1.data)
+                matricula=form.matricula.data,
+                name=form.name.data,
+                password=generate_password_hash(form.password1.data),
+                professor=form.professor.data
             )
             sess = Session()
             sess.add(user)
             sess.commit()
             sess.close()
 
-            flash("User created", "success")
+            flash("Usuário criado com sucesso", "success")
 
             return redirect(url_for("account_app.sign_in"))
-        except:
-            flash("Invalid inputs", "failed")
+        except Exception as e:
+            flash("Entradas inválidas", "failed")
             return redirect(url_for("account_app.sign_up"))
     else:
-        flash("Invalid security token", "failed")
+        flash("Token inválido", "failed")
         return redirect(url_for("account_app.sign_in"))
-
-
-@account_app.route("/home", methods=["GET"])
-@login_required
-def home():
-    sess = Session()
-    del_user = request.args.get("del")
-
-    if del_user:
-        user = sess.query(User).filter_by(id=del_user).first()
-        sess.delete(user)
-        sess.commit()
-
-    users = sess.query(User).limit(10).all()
-    sess.close()
-
-    return render_template("account/home.html", current_user=current_user, users=users)
 
 
 @account_app.route("/profile", methods=["GET", "POST"])
@@ -87,7 +72,7 @@ def home():
 def profile():
     form = SignUpForm()
     if request.method == "GET":
-        form.username.data = current_user.username
+        form.matricula.data = current_user.matricula
 
         return render_template("account/profile.html", form=form)
 
@@ -104,27 +89,29 @@ def profile():
 
             user = User(
                 id=current_user.id,
-                username=form.username.data,
-                password=generate_password_hash(form.password1.data)
+                matricula=form.matricula.data,
+                name=form.name.data,
+                password=generate_password_hash(form.password1.data),
+                professor=form.professor.data
             )
             sess.add(user)
             sess.commit()
 
             sess.close()
 
-            flash("User edited", "success")
+            flash("Usuário editado", "success")
 
-            return redirect(url_for("account_app.home"))
+            return redirect(url_for("chamada_app.home"))
         except:
-            flash("Invalid inputs", "failed")
+            flash("Entradas invalidas", "failed")
             return redirect(url_for("account_app.profile"))
     else:
-        flash("Invalid security token", "failed")
+        flash("Token inválido", "failed")
         return redirect(url_for("account_app.profile"))
 
 @account_app.route("/logout", methods=["GET"])
 @login_required
 def log_out():
     logout_user()
-    flash("Logging out", "success")
+    flash("Saindo...", "success")
     return redirect(url_for("account_app.sign_in"))

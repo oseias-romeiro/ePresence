@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{% block title %}Adicionando{% endblock %} aluno</h2>
+    <br>
+    <form method="post" autocomplete="off">
+        {{ form.csrf_token }}
+
+        {{ form.mat.label }}<br>
+        {{ form.mat }}<br>
+
+        <input hidden type="text" name="id_turma" value="{{ id_turma }}">
+
+        <br>
+        <button class="btn btn-dark" type="submit">Adicionar</button>
+        <a href="/chamada">
+            <button class="btn btn-secondary" type="button" class="btn-cancel">Cancel</button>
+        </a>
+    </form>
+
+{% endblock %}

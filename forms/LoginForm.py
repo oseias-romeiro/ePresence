@@ -1,15 +1,17 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField
+from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import input_required
 
 
 class SignInForm(FlaskForm):
-    username = StringField("Username", validators=[input_required()])
-    password = PasswordField("Password", validators=[input_required()])
+    matricula = StringField("Matricula", validators=[input_required()])
+    password = PasswordField("Senha", validators=[input_required()])
 
 
 class SignUpForm(FlaskForm):
-    username = StringField("Username", validators=[input_required()])
-    password1 = PasswordField("Password", validators=[input_required()])
-    password2 = PasswordField("Retype password", validators=[input_required()])
+    matricula = StringField("Matricula", validators=[input_required()])
+    name = StringField("Nome", validators=[input_required()])
+    password1 = PasswordField("Senha", validators=[input_required()])
+    password2 = PasswordField("Digite novamente a senha", validators=[input_required()])
+    professor = BooleanField("Professor")
 
