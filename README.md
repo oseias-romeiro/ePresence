@@ -2,7 +2,7 @@
 
 Projeto de Engenharia de Software: Proposta de solução para uma versão eletrônica e colaborativa/descentralizada da chamada de presença.
 
-- Experimente: [chamadaeletronica.oseiasromeiro.repl.co][https://chamadaeletronica.oseiasromeiro.repl.co]
+- Experimente: [chamadaeletronica.oseiasromeiro.repl.co](https://chamadaeletronica.oseiasromeiro.repl.co)
 
 ## Descrição
 
