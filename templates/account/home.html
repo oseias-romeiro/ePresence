@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>
+        {% block title %}Wellcome{% endblock %}, {{ current_user.username }}.
+    </h2>
+
+    <button onclick="window.location.href='/account/logout'" class="btn btn-dark">Logout</button>
+    <button onclick="window.location.href='/account/profile'" class="btn btn-secondary">Profile</button>
+
+    <br><br>
+    <a href="/">Index</a>
+
+    <hr>
+    <br>
+    <table class="table">
+        <tr>
+            <th>Id</th>
+            <th>Username</th>
+            <th>Action</th>
+        </tr>
+        {% for u in users %}
+            <tr>
+                <td>{{ u.id }}</td>
+                <td>{{ u.username }}</td>
+                <td>
+                    <button onclick="window.location.href='/account/home?del={{ u.id }}'" class="btn">&times;</button>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}
