@@ -73,6 +73,8 @@ def profile():
     form = SignUpForm()
     if request.method == "GET":
         form.matricula.data = current_user.matricula
+        form.name.data = current_user.name
+        form.professor.data = current_user.professor
 
         return render_template("account/profile.html", form=form)
 

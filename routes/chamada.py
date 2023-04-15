@@ -1,12 +1,13 @@
-from flask import Blueprint, request, render_template, flash, redirect, url_for
+from flask import Blueprint, request, render_template, flash, redirect, url_for, Response
 from flask_login import login_required
 from flask_login import current_user
+from datetime import datetime, timedelta
+import qrcode, io
 
 from db import Session
 from models.User import User, Turmas, Turma, Frequencia, Chamada
 from forms.TurmaForm import TurmaForm, AddAluno
 
-import datetime
 
 chamada_app = Blueprint("chamada_app", __name__)
 
@@ -27,6 +28,11 @@ def home():
 @chamada_app.route("/add_turma", methods=["GET", "POST"])
 @login_required
 def add_turma():
+
+    if not current_user.professor:
+        flash("Usuário não é professor", "failed")
+        return redirect(url_for("chamada_app.home"))
+
     form = TurmaForm()
     if request.method == "GET":
         return render_template("chamada/add_turma.html", form=form)
@@ -70,6 +76,11 @@ def add_turma():
 @chamada_app.route("/del_turma", methods=["GET"])
 @login_required
 def del_turma():
+
+    if not current_user.professor:
+        flash("Usuário não é professor", "failed")
+        return redirect(url_for("chamada_app.home"))
+    
     id_turma = request.args.get("id_turma")
 
     try:
@@ -130,60 +141,131 @@ def add_aluno():
         flash("Token inválido", "failed")
         return redirect(url_for("chamada_app.add_aluno"))
 
-@chamada_app.route("/chamada", methods=["GET"])
-@login_required
-def chamada():
 
-    id_turma = request.args.get("turma_id")
+
+@chamada_app.route("/frequencias", methods=["GET"])
+@login_required
+def frequencias():
+    id_turma = request.args.get("id_turma")
+    sess = Session()
+
+    turmas_aluno = [t.id_turma for t in sess.query(Turmas).filter_by(id_user=current_user.id).all()]
     
-    if request.method == "GET":
+    if not int(id_turma) in turmas_aluno:
+        flash("Usuário não pertence a turma", "failed")
+        return redirect(url_for("chamada_app.home"))
+    
+    chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
+
+    chamadas_frequencias = []
+    for c in chamadas:
+        freqs = sess.query(Frequencia).filter_by(
+            id_user=current_user.id,
+            id_chamada=c.id
+        ).all()
+        freqs_chamada = [f.id_chamada for f in freqs]
+        chamadas_frequencias.append({
+            "date": c.date,
+            "presente": c.id in freqs_chamada,
+            "id": c.id,
+        })
+
+    sess.close()
+    return render_template("chamada/frequencias.html", chamadas=chamadas_frequencias, id_turma=id_turma)
+
+
+
+@chamada_app.route("/add_chamada", methods=["GET"])
+@login_required
+def add_chamada():
+
+    if not current_user.professor:
+        flash("Usuário não é professor", "failed")
+        return redirect(url_for("chamada_app.home"))
+
+    id_turma = request.args.get("id_turma")
+    
+    if id_turma:
         sess = Session()
-        dia = datetime.datetime.now()
+        dia = datetime.now()
         try:
             ch = sess.query(Chamada).filter_by(date=dia.date(), id_turma=id_turma).all()
-            if(current_user.professor):
-                if len(ch) == 0:
-                    chamada = Chamada(
-                        date = dia.date(),
-                        id_turma = id_turma
-                    )
-                    sess.add(chamada)
-                    sess.commit()
-                    flash("Chamada criada", "success")
-                else:
-                    raise Exception("Chamada já foi criada")
-            else:
-                
-                if len(ch) > 0:
-                    responida = sess.query(Frequencia).filter_by(id_user=current_user.id, id_chamada=ch[0].id).all()
-                    
-                    if len(responida) == 0:
-                        frequencia = Frequencia(
-                            id_user = current_user.id,
-                            id_chamada = ch[0].id
-                        )
-                        sess.add(frequencia)
-                        sess.commit()
-                        flash("Frequencia Respondida", "success")
-                    else:
-                        flash("Frequencia ja foi responida", "failed")
-                else:
-                    raise Exception("Chamada não foi criada ainda")
-            
+            if len(ch) == 0:
+                chamada = Chamada(
+                    date = dia.date(),
+                    id_turma = id_turma
+                )
+                sess.add(chamada)
+                sess.commit()
 
+                #flash("Chamada criada - Qrcode valido por 10 minutos", "success")
+
+                id_chamada = sess.query(Chamada).filter_by(date=dia.date()).first().id
+                expiration = datetime.now() + timedelta(minutes=10)
+                temp_url = url_for("chamada_app.add_frequencia", expiration=expiration, id_chamada=id_chamada, _external=True)
+
+                qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
+                qr.add_data(temp_url)
+                qr.make(fit=True)
+
+                img_buffer = io.BytesIO()
+                img = qr.make_image(fill_color="black", back_color="white")
+                img.save(img_buffer, "PNG")
+                img_buffer.seek(0)
+
+                return Response(img_buffer, mimetype="image/png")
+            
+            else:
+                raise Exception("Chamada já foi criada")
+            
         except Exception as e:
             flash(e.__str__(), "failed")
             return redirect(url_for("chamada_app.home"))
+    
+    else:
+        flash("Selecione uma turma", "failed")
+        return redirect(url_for("chamada_app.home"))
+        
 
-        freq = []
-        try:
-            for f in sess.query(Frequencia).all():
-                freq.append(sess.query(User).filter_by(id=f.id_user).first())
-        except Exception as e:
-            flash("Erro ao buscar usuarios", "failed")
+@chamada_app.route("/add_frequencia", methods=["GET"])
+@login_required
+def add_frequencia():
+    expiration = request.args.get("expiration")
+    id_chamada = request.args.get("id_chamada")
+
+    if expiration is not None:
+        expiration = datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
+        if datetime.now() > expiration:
+            flash("Código expirado", "failed")
             return redirect(url_for("chamada_app.home"))
 
-        sess.close()
-        return render_template("chamada/chamada.html", freq=freq, dia=str(dia).split(' ')[0])
 
+    sess = Session()
+    freq = Frequencia(
+        id_user = current_user.id,
+        id_chamada = id_chamada
+    )
+    sess.add(freq)
+    sess.commit()
+    sess.close()
+    
+    flash("Frequencia registrada", "success")
+    return redirect(url_for("chamada_app.home"))
+
+@chamada_app.route("/lista", methods=["GET"])
+@login_required
+def lista():
+    dia = request.args.get("dia")
+    id_chamada = request.args.get("id_chamada")
+
+    sess = Session()
+    frequencias_list = sess.query(Frequencia).filter_by(id_chamada=id_chamada).all()
+    
+    alunos = []
+    for f in frequencias_list:
+        alunos.append(sess.query(User).filter_by(id=f.id_user).first())
+    
+    sess.close()
+
+    return render_template("chamada/lista.html", alunos=alunos, dia=dia)
 

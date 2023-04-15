@@ -7,8 +7,10 @@
 
     <button onclick="window.location.href='/account/logout'" class="btn btn-dark">Logout</button>
     <button onclick="window.location.href='/account/profile'" class="btn btn-secondary">Profile</button>
-    <button onclick="window.location.href='/chamada/add_turma'" class="btn btn-secondary">Add turma</button>
 
+    {% if current_user.professor %}
+    <button onclick="window.location.href='/chamada/add_turma'" class="btn btn-secondary">Add turma</button>
+    {% endif %}
     <br><br>
     <a href="/">Index</a>
 
@@ -17,22 +19,27 @@
 
     <table class="table">
         <tr>
-            <th>Id</th>
-            <th>Turma</th>
-            {% if current_user.professor %}
+            <th>Turmas</th>
             <th>Action</th>
-            {% endif %}
         </tr>
         {% for t in turmas %}
             <tr>
-                <td>{{ t.id }}</td>
-                <td>
-                    <a href="/chamada/chamada?turma_id={{ t.id }}">{{ t.name }}</a>
-                </td>
+                <td>{{ t.name }}</td>
                 {% if current_user.professor %}
                 <td>
-                    <a href="/chamada/add_aluno?id_turma={{ t.id }}">Add aluno</a>
-                    <a href="/chamada/del_turma?id_turma={{ t.id }}">Remover Turma</a>
+                    <a href="/chamada/add_aluno?id_turma={{ t.id }}" style="text-decoration: none;">
+                        <button>Add aluno</button>
+                    </a>
+                    <a href="/chamada/del_turma?id_turma={{ t.id }}" style="text-decoration: none;">
+                        <button>Remover Turma</button>
+                    </a>
+                    <a href="/chamada/frequencias?id_turma={{ t.id }}" style="text-decoration: none;">
+                        <button>Frequencia</button>
+                    </a>
+                </td>
+                {% else %}
+                <td>
+                    <a href="/chamada/frequencias?id_turma={{ t.id }}">Frequencia</a>
                 </td>
                 {% endif %}
             </tr>

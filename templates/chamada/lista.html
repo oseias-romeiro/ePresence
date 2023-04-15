@@ -2,7 +2,7 @@
 
 {% block content %}
     <h2>
-        {% block title %}Chamda{% endblock %} do dia: {{ dia }}
+        {% block title %}Lista de frequencia{% endblock %} do dia: {{ dia }}
     </h2>
 
     <br><br>
@@ -13,15 +13,13 @@
 
     <table class="table">
         <tr>
-            <th>Id</th>
             <th>Matricula</th>
             <th>Nome</th>
         </tr>
-        {% for f in freq %}
+        {% for a in alunos %}
             <tr>
-                <td>{{ f.id }}</td>
-                <td>{{ f.matricula }}</td>
-                <td>{{ f.name }}</td>
+                <td>{{ a.matricula }}</td>
+                <td>{{ a.name }}</td>
             </tr>
         {% endfor %}
     </table>

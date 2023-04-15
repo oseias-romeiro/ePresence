@@ -1,0 +1,45 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>
+        {% block title %}Frequencias{% endblock %}
+    </h2>
+    
+    <a href="/chamada">Home</a>
+
+    <hr>
+    <br>
+    {% if current_user.professor %}
+    <a href="/chamada/add_chamada?id_turma={{ id_turma }}" style="text-decoration: none;">
+        <button>Adicionar chamada</button>
+    </a>
+    {% endif %}
+
+    <table class="table">
+        <tr>
+            <th>Data</th>
+            {% if current_user.professor %}
+            <th>Frequencia</th>
+            {% else %}
+            <th>Action</th>
+            {% endif %}
+        </tr>
+        {% for c in chamadas %}
+        <tr>
+            <td>{{ c["date"] }}</td>
+            {% if current_user.professor %}
+            <td>
+                <a href="/chamada/lista?dia={{ c['date'] }}&id_chamada={{ c['id'] }}" style="text-decoration: none;">
+                    lista
+                </a>
+            </td>
+            {% else %}
+            <td>{{ "Presente" if c["presente"] else "Ausente" }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}
+
