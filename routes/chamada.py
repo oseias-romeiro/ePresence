@@ -213,27 +213,26 @@ def frequencias():
     id_turma = request.args.get("id_turma")
     chamadas_frequencias = []
     
-    if professor_required(current_user, id_turma):
-        try:
-            sess = Session()
-    
-            chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
+    try:
+        sess = Session()
 
-            for c in chamadas:
-                freqs = sess.query(Frequencia).filter_by(
-                    id_user=current_user.id,
-                    id_chamada=c.id
-                ).all()
-                freqs_chamada = [f.id_chamada for f in freqs]
-                chamadas_frequencias.append({
-                    "date": c.date,
-                    "presente": c.id in freqs_chamada,
-                    "id": c.id,
-                })
-            sess.close()
-        except:
-            flash("Erro ao coletar frequencias", "danger")
-            return redirect(url_for("chamada_app.home"))
+        chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
+
+        for c in chamadas:
+            freqs = sess.query(Frequencia).filter_by(
+                id_user=current_user.id,
+                id_chamada=c.id
+            ).all()
+            freqs_chamada = [f.id_chamada for f in freqs]
+            chamadas_frequencias.append({
+                "date": c.date,
+                "presente": c.id in freqs_chamada,
+                "id": c.id,
+            })
+        sess.close()
+    except:
+        flash("Erro ao coletar frequencias", "danger")
+        return redirect(url_for("chamada_app.home"))
         
     return render_template("chamada/frequencias.html", chamadas=chamadas_frequencias, id_turma=id_turma)
 
