@@ -30,7 +30,7 @@ def home():
 def add_turma():
 
     if not current_user.professor:
-        flash("Usuário não é professor", "failed")
+        flash("Usuário não é professor", "danger")
         return redirect(url_for("chamada_app.home"))
 
     form = TurmaForm()
@@ -66,10 +66,10 @@ def add_turma():
 
             return redirect(url_for("chamada_app.home"))
         except Exception as e:
-            flash("Erro ao adicionar turma", "failed")
+            flash("Erro ao adicionar turma", "danger")
             return redirect(url_for("chamada_app.add_turma"))
     else:
-        flash("Token inválido", "failed")
+        flash("Token inválido", "danger")
         return redirect(url_for("chamada_app.add_turma"))
     
 
@@ -78,7 +78,7 @@ def add_turma():
 def del_turma():
 
     if not current_user.professor:
-        flash("Usuário não é professor", "failed")
+        flash("Usuário não é professor", "danger")
         return redirect(url_for("chamada_app.home"))
     
     id_turma = request.args.get("id_turma")
@@ -100,7 +100,7 @@ def del_turma():
 
         return redirect(url_for("chamada_app.home"))
     except:
-        flash("Erro ao remover turma", "failed")
+        flash("Erro ao remover turma", "danger")
         return redirect(url_for("chamada_app.home"))
 
 
@@ -135,10 +135,10 @@ def add_aluno():
 
             return redirect(url_for("chamada_app.home"))
         except:
-            flash("Erro ao adicionar aluno", "failed")
+            flash("Erro ao adicionar aluno", "danger")
             return redirect(url_for("chamada_app.add_aluno"))
     else:
-        flash("Token inválido", "failed")
+        flash("Token inválido", "danger")
         return redirect(url_for("chamada_app.add_aluno"))
 
 
@@ -152,7 +152,7 @@ def frequencias():
     turmas_aluno = [t.id_turma for t in sess.query(Turmas).filter_by(id_user=current_user.id).all()]
     
     if not int(id_turma) in turmas_aluno:
-        flash("Usuário não pertence a turma", "failed")
+        flash("Usuário não pertence a turma", "danger")
         return redirect(url_for("chamada_app.home"))
     
     chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
@@ -180,7 +180,7 @@ def frequencias():
 def add_chamada():
 
     if not current_user.professor:
-        flash("Usuário não é professor", "failed")
+        flash("Usuário não é professor", "danger")
         return redirect(url_for("chamada_app.home"))
 
     id_turma = request.args.get("id_turma")
@@ -219,11 +219,11 @@ def add_chamada():
                 raise Exception("Chamada já foi criada")
             
         except Exception as e:
-            flash(e.__str__(), "failed")
+            flash(e.__str__(), "danger")
             return redirect(url_for("chamada_app.home"))
     
     else:
-        flash("Selecione uma turma", "failed")
+        flash("Selecione uma turma", "danger")
         return redirect(url_for("chamada_app.home"))
         
 
@@ -236,7 +236,7 @@ def add_frequencia():
     if expiration is not None:
         expiration = datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
         if datetime.now() > expiration:
-            flash("Código expirado", "failed")
+            flash("Código expirado", "danger")
             return redirect(url_for("chamada_app.home"))
 
 

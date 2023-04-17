@@ -4,19 +4,7 @@
     <h2>
         {% block title %}Bem vindo{% endblock %}, {{ current_user.name }}.
     </h2>
-
-    <button onclick="window.location.href='/account/logout'" class="btn btn-dark">Logout</button>
-    <button onclick="window.location.href='/account/profile'" class="btn btn-secondary">Profile</button>
-
-    {% if current_user.professor %}
-    <button onclick="window.location.href='/chamada/add_turma'" class="btn btn-secondary">Add turma</button>
-    {% endif %}
-    <br><br>
-    <a href="/">Index</a>
-
-    <hr>
     <br>
-
     <table class="table">
         <tr>
             <th>Turmas</th>
@@ -28,13 +16,13 @@
                 {% if current_user.professor %}
                 <td>
                     <a href="/chamada/add_aluno?id_turma={{ t.id }}" style="text-decoration: none;">
-                        <button>Add aluno</button>
+                        <button class="btn btn-light">Add aluno</button>
                     </a>
                     <a href="/chamada/del_turma?id_turma={{ t.id }}" style="text-decoration: none;">
-                        <button>Remover Turma</button>
+                        <button class="btn btn-light">Remover Turma</button>
                     </a>
                     <a href="/chamada/frequencias?id_turma={{ t.id }}" style="text-decoration: none;">
-                        <button>Frequencia</button>
+                        <button class="btn btn-light">Frequencia</button>
                     </a>
                 </td>
                 {% else %}

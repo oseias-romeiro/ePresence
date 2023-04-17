@@ -3,20 +3,20 @@
 {% block content %}
     <h2>{% block title %}Sing up{% endblock %}</h2>
     <br>
-    <form method="post" autocomplete="off">
+    <form method="post" autocomplete="off" style="max-width: 350px;;">
         {{ form.csrf_token }}
 
         {{ form.matricula.label }}<br>
-        {{ form.matricula }}<br>
+        {{ form.matricula(class_="form-control") }}<br>
 
         {{ form.name.label }}<br>
-        {{ form.name }}<br>
+        {{ form.name(class_="form-control") }}<br>
 
         {{ form.password1.label }}<br>
-        {{ form.password1 }}<br>
+        {{ form.password1(class_="form-control") }}<br>
 
         {{ form.password2.label }}<br>
-        {{ form.password2 }}<br>
+        {{ form.password2(class_="form-control") }}<br>
 
         {{ form.professor.label }}<br>
         {{ form.professor }}<br>

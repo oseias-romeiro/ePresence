@@ -26,12 +26,12 @@ def load_user(user):
 
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html", user_authed=current_user.is_authenticated)
+    return redirect(url_for("chamada_app.home"))
 
 
 @app.errorhandler(401)
 def custom_401(error):
-    flash("Need login", "failed")
+    flash("Faça o login primeiro", "danger")
     return redirect(url_for("account_app.sign_in"))
 
 
@@ -39,52 +39,6 @@ def custom_401(error):
 def custom_404(error):
     return redirect(url_for("index"))
 
-
-def create_user():
-    sess = Session()
-    try:
-        user = User(
-            id=1,
-            matricula="000000000",
-            name="prof1",
-            password=generate_password_hash("1234"),
-            professor=True
-        )
-        sess.add(user)
-        sess.commit()
-    except:
-        del user
-        sess.rollback()
-    sess.close()
-
-def create_turma():
-    sess = Session()
-    try:
-        turma = Turma(
-            id=1,
-            name="turma1"
-        )
-        sess.add(turma)
-        sess.commit()
-    except:
-        del turma
-        sess.rollback()
-    sess.close()
-
-def create_turmas():
-    sess = Session()
-    try:
-        turma = Turmas(
-            id = 1,
-            id_user = 1,
-            id_turma = 1
-        )
-        sess.add(turma)
-        sess.commit()
-    except:
-        del turma
-        sess.rollback()
-    sess.close()
 
 if __name__ == "__main__":
     # creating tables

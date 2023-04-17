@@ -12,7 +12,7 @@
     <br>
     {% if current_user.professor %}
     <a href="/chamada/add_chamada?id_turma={{ id_turma }}" style="text-decoration: none;">
-        <button>Adicionar chamada</button>
+        <button class="btn btn-light">Adicionar chamada</button>
     </a>
     {% endif %}
 
@@ -20,9 +20,9 @@
         <tr>
             <th>Data</th>
             {% if current_user.professor %}
-            <th>Frequencia</th>
-            {% else %}
             <th>Action</th>
+            {% else %}
+            <th>Frequencia</th>
             {% endif %}
         </tr>
         {% for c in chamadas %}

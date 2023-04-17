@@ -1,4 +1,3 @@
 **/__pycache__/**
 .idea/**
 .vscode/**
-flask_template_db.sqlite

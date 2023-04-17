@@ -27,10 +27,10 @@ def sign_in():
             login_user(user)
             return redirect(url_for("chamada_app.home"))
         else:
-            flash("Matricula/senha invalida", "failed")
+            flash("Matricula/senha invalida", "danger")
             return redirect(url_for("account_app.sign_in"))
     else:
-        flash("Token invalido", "failed")
+        flash("Token invalido", "danger")
         return redirect(url_for("account_app.sign_in"))
 
 
@@ -60,10 +60,10 @@ def sign_up():
 
             return redirect(url_for("account_app.sign_in"))
         except Exception as e:
-            flash("Entradas inválidas", "failed")
+            flash("Entradas inválidas", "danger")
             return redirect(url_for("account_app.sign_up"))
     else:
-        flash("Token inválido", "failed")
+        flash("Token inválido", "danger")
         return redirect(url_for("account_app.sign_in"))
 
 
@@ -105,10 +105,10 @@ def profile():
 
             return redirect(url_for("chamada_app.home"))
         except:
-            flash("Entradas invalidas", "failed")
+            flash("Entradas invalidas", "danger")
             return redirect(url_for("account_app.profile"))
     else:
-        flash("Token inválido", "failed")
+        flash("Token inválido", "danger")
         return redirect(url_for("account_app.profile"))
 
 @account_app.route("/logout", methods=["GET"])
