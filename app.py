@@ -1,9 +1,8 @@
-from flask import Flask, render_template, redirect, url_for, flash
-from werkzeug.security import generate_password_hash
-from flask_login import LoginManager, current_user
+from flask import Flask, redirect, url_for, flash
+from flask_login import LoginManager
 
 from routes import account, chamada
-from models.User import User, Base, Turma, Turmas
+from models.User import User, Base
 from db import engine, Session
 
 app = Flask(__name__)

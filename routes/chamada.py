@@ -4,7 +4,7 @@ from flask_login import current_user
 from datetime import datetime, timedelta
 import qrcode, io
 
-from db import Session
+from db import Session, professor_required
 from models.User import User, Turmas, Turma, Frequencia, Chamada
 from forms.TurmaForm import TurmaForm, AddAluno
 
@@ -78,13 +78,13 @@ def add_turma():
 @chamada_app.route("/del_turma", methods=["GET"])
 @login_required
 def del_turma():
-
-    try:
-        id_turma = request.args.get("id_turma")
-        sess = Session()
-        turmas = sess.query(Turmas).filter_by(id_turma=id_turma).all()
-        
-        if current_user.professor and current_user.id in [t.id_user for t in turmas]:
+    id_turma = request.args.get("id_turma")
+    
+    if professor_required(current_user, id_turma):
+        try:
+            sess = Session()
+            turmas = sess.query(Turmas).filter_by(id_turma=id_turma).all()
+            
             chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
             
             for c in chamadas:
@@ -103,14 +103,11 @@ def del_turma():
             sess.close()
 
             flash("Turma removida", "success")
-
             return redirect(url_for("chamada_app.home"))
-        else:
-            flash("Usuário não é professor", "danger")
-        
-    except Exception as e:
-        print("####", e)
-        flash("Erro ao remover turma", "danger")
+        except:
+            flash("Erro ao remover turma", "danger")
+    else:
+        flash("Usuário precisa ser um professor registrado na turma", "denger")
     
     return redirect(url_for("chamada_app.home"))
 
@@ -118,14 +115,14 @@ def del_turma():
 @chamada_app.route("/list_alunos", methods=["GET"])
 @login_required
 def list_alunos():
+    id_turma = request.args.get("id_turma")
     
-    try:
-        id_turma = request.args.get("id_turma")
-        sess = Session()
-        
-        turma_alunos = sess.query(Turmas).filter_by(id_turma=id_turma).all()
-        
-        if current_user.professor and current_user.id in [t.id_user for t in turma_alunos]:
+    if professor_required(current_user, id_turma):
+        try: 
+            sess = Session()
+            
+            turma_alunos = sess.query(Turmas).filter_by(id_turma=id_turma).all()
+            
             alunos = []
             for t in turma_alunos:
                 alunos.append(sess.query(User).filter_by(id=t.id_user).first())
@@ -133,10 +130,10 @@ def list_alunos():
             sess.close()
             
             return render_template("chamada/list_alunos.html", alunos=alunos, id_turma=id_turma)
-        else:
-            flash("Usuário precisa ser um professor matriculado na turma", "danger")
-    except:
-        flash("Erro ao listar usuarios", "danger")
+        except:
+            flash("Erro ao listar usuarios", "danger")
+    else:
+        flash("Usuário precisa ser um professor matriculado na turma", "danger")
         
     return redirect(url_for("chamada_app.home"))
 
@@ -144,15 +141,14 @@ def list_alunos():
 @chamada_app.route("/del_aluno", methods=["GET"])
 @login_required
 def del_aluno():
+    id_aluno = request.args.get("id_aluno")
+    id_turma = request.args.get("id_turma")
     
-    try:
-        sess = Session()
-        
-        id_aluno = request.args.get("id_aluno")
-        id_turma = request.args.get("id_turma")
-        turma_alunos = sess.query(Turmas).filter_by(id_turma=id_turma).all()
-        
-        if current_user.professor and current_user.id in [t.id_user for t in turma_alunos]:
+    if professor_required(current_user, id_turma):
+        try:
+            sess = Session()
+            
+            turma_alunos = sess.query(Turmas).filter_by(id_turma=id_turma).all()
 
             for t in turma_alunos:
                 if t.id_user == int(id_aluno):
@@ -163,11 +159,11 @@ def del_aluno():
             sess.close()
             
             flash("Aluno removido com sucesso", "success")
-        else:
-            flash("Usuário precisa ser um professor matriculado na turma", "danger")
-    
-    except:
-        flash("Erro ao remover usuario", "danger")
+            
+        except:
+            flash("Erro ao remover usuario", "danger")
+    else:
+        flash("Usuário precisa ser um professor matriculado na turma", "danger")
         
     return redirect(url_for("chamada_app.home"))
 
@@ -182,35 +178,30 @@ def add_aluno():
     
     elif request.method == "POST":
         
-        if not current_user.professor:
-            flash("Usuário precisa ser um professor", "danger")
-            return redirect(url_for("chamada_app.home"))
-        
         id_turma = request.form.get("id_turma")
         mat = request.form.get("mat")
 
-        try:
-            sess = Session()
+        if professor_required(current_user, id_turma):
+            try:
+                sess = Session()
 
-            id_user = sess.query(User).filter_by(matricula=mat).first().id
+                id_user = sess.query(User).filter_by(matricula=mat).first().id
 
-            turmas = Turmas(
-                id_user = id_user,
-                id_turma = id_turma
-            )
-            print("###", turmas.id_user, turmas.id_turma)
-            sess.add(turmas)
+                turmas = Turmas(
+                    id_user = id_user,
+                    id_turma = id_turma
+                )
+                sess.add(turmas)
 
-            sess.commit()
-            sess.close()
+                sess.commit()
+                sess.close()
 
-            flash("Aluno adicionado", "success")
-
-            return redirect(url_for("chamada_app.home"))
-        except:
-            flash("Erro ao adicionar aluno", "danger")
-    else:
-        flash("Token inválido", "danger")
+                flash("Aluno adicionado", "success")
+                return redirect(url_for("chamada_app.home"))
+            except:
+                flash("Erro ao adicionar aluno", "danger")
+        else:
+            flash("Usuário precisa ser um professor matriculado na turma", "danger")
         
     return redirect(url_for("chamada_app.add_aluno"))
 
@@ -220,30 +211,30 @@ def add_aluno():
 @login_required
 def frequencias():
     id_turma = request.args.get("id_turma")
-    sess = Session()
-
-    turmas_aluno = [t.id_turma for t in sess.query(Turmas).filter_by(id_user=current_user.id).all()]
-    
-    if not int(id_turma) in turmas_aluno:
-        flash("Usuário não pertence a turma", "danger")
-        return redirect(url_for("chamada_app.home"))
-    
-    chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
-
     chamadas_frequencias = []
-    for c in chamadas:
-        freqs = sess.query(Frequencia).filter_by(
-            id_user=current_user.id,
-            id_chamada=c.id
-        ).all()
-        freqs_chamada = [f.id_chamada for f in freqs]
-        chamadas_frequencias.append({
-            "date": c.date,
-            "presente": c.id in freqs_chamada,
-            "id": c.id,
-        })
+    
+    if professor_required(current_user, id_turma):
+        try:
+            sess = Session()
+    
+            chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
 
-    sess.close()
+            for c in chamadas:
+                freqs = sess.query(Frequencia).filter_by(
+                    id_user=current_user.id,
+                    id_chamada=c.id
+                ).all()
+                freqs_chamada = [f.id_chamada for f in freqs]
+                chamadas_frequencias.append({
+                    "date": c.date,
+                    "presente": c.id in freqs_chamada,
+                    "id": c.id,
+                })
+            sess.close()
+        except:
+            flash("Erro ao coletar frequencias", "danger")
+            return redirect(url_for("chamada_app.home"))
+        
     return render_template("chamada/frequencias.html", chamadas=chamadas_frequencias, id_turma=id_turma)
 
 
@@ -251,17 +242,12 @@ def frequencias():
 @chamada_app.route("/add_chamada", methods=["GET"])
 @login_required
 def add_chamada():
-
-    if not current_user.professor:
-        flash("Usuário não é professor", "danger")
-        return redirect(url_for("chamada_app.home"))
-
     id_turma = request.args.get("id_turma")
     
-    if id_turma:
-        sess = Session()
-        dia = datetime.now()
+    if professor_required(current_user, id_turma):
         try:
+            sess = Session()
+            dia = datetime.now()
             ch = sess.query(Chamada).filter_by(date=dia.date(), id_turma=id_turma).all()
             if len(ch) == 0:
                 chamada = Chamada(
@@ -270,8 +256,6 @@ def add_chamada():
                 )
                 sess.add(chamada)
                 sess.commit()
-
-                #flash("Chamada criada - Qrcode valido por 10 minutos", "success")
 
                 id_chamada = sess.query(Chamada).filter_by(date=dia.date()).first().id
                 expiration = datetime.now() + timedelta(minutes=10)
@@ -289,15 +273,15 @@ def add_chamada():
                 return Response(img_buffer, mimetype="image/png")
             
             else:
-                raise Exception("Chamada já foi criada")
+                flash("Chamada já foi criada", "info")
             
-        except Exception as e:
-            flash(e.__str__(), "danger")
-            return redirect(url_for("chamada_app.home"))
+        except:
+            flash("Houve um erro na consluta", "danger")
     
     else:
-        flash("Selecione uma turma", "danger")
-        return redirect(url_for("chamada_app.home"))
+        flash("Usuário precisa ser um professor matriculado na turma", "danger")
+    
+    return redirect(url_for("chamada_app.home"))
         
 
 @chamada_app.route("/add_frequencia", methods=["GET"])
@@ -312,17 +296,19 @@ def add_frequencia():
             flash("Código expirado", "danger")
             return redirect(url_for("chamada_app.home"))
 
-
-    sess = Session()
     freq = Frequencia(
         id_user = current_user.id,
         id_chamada = id_chamada
     )
-    sess.add(freq)
-    sess.commit()
-    sess.close()
+    try:
+        with Session() as sess:
+            sess.add(freq)
+            sess.commit()
+            
+        flash("Frequencia registrada", "success")
+    except:
+        flash("Houve um erro registrar frequencia", "danger")
     
-    flash("Frequencia registrada", "success")
     return redirect(url_for("chamada_app.home"))
 
 
@@ -332,14 +318,18 @@ def lista():
     dia = request.args.get("dia")
     id_chamada = request.args.get("id_chamada")
 
-    sess = Session()
-    frequencias_list = sess.query(Frequencia).filter_by(id_chamada=id_chamada).all()
-    
-    alunos = []
-    for f in frequencias_list:
-        alunos.append(sess.query(User).filter_by(id=f.id_user).first())
-    
-    sess.close()
+    try:
+        sess = Session()
+        frequencias_list = sess.query(Frequencia).filter_by(id_chamada=id_chamada).all()
+        
+        alunos = []
+        for f in frequencias_list:
+            alunos.append(sess.query(User).filter_by(id=f.id_user).first())
+        
+        sess.close()
+    except:
+        flash("Houve um erro ao coletar a lista de frequecia", "danger")
+        return redirect(url_for("chamada_app.home"))
 
     dia = datetime.strptime(dia, "%Y-%m-%d")
     return render_template("chamada/lista.html", alunos=alunos, dia=dia.strftime("%d/%m/%Y"))
