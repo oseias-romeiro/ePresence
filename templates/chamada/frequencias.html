@@ -5,10 +5,6 @@
     <h2>
         {% block title %}Frequencias{% endblock %}
     </h2>
-    
-    <a href="/chamada">Home</a>
-
-    <hr>
     <br>
     {% if current_user.professor %}
     <a href="/chamada/add_chamada?id_turma={{ id_turma }}" style="text-decoration: none;">

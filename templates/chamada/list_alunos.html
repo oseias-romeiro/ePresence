@@ -1,0 +1,32 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>
+        {% block title %}Alunos{% endblock %}
+    </h2>
+    <br>
+    <a href="/chamada/add_aluno?id_turma={{ id_turma }}" style="text-decoration: none;">
+        <button class="btn btn-light">Add aluno</button>
+    </a>
+    <table class="table">
+        <tr>
+            <th>Matricula</th>
+            <th>Nome</th>
+            <th>Action</th>
+        </tr>
+        {% for a in alunos %}
+        <tr>
+            {% if not a.professor %}
+            <td>{{ a.matricula }}</td>
+            <td>{{ a.name }}</td>
+            <td>
+                <a href="/chamada/del_aluno?id_aluno={{ a.id }}&id_turma={{ id_turma }}">Remover</a>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}
+

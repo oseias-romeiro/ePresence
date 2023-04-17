@@ -15,8 +15,8 @@
                 <td>{{ t.name }}</td>
                 {% if current_user.professor %}
                 <td>
-                    <a href="/chamada/add_aluno?id_turma={{ t.id }}" style="text-decoration: none;">
-                        <button class="btn btn-light">Add aluno</button>
+                    <a href="/chamada/list_alunos?id_turma={{ t.id }}" style="text-decoration: none;">
+                        <button class="btn btn-light">Alunos</button>
                     </a>
                     <a href="/chamada/del_turma?id_turma={{ t.id }}" style="text-decoration: none;">
                         <button class="btn btn-light">Remover Turma</button>

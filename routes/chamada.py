@@ -11,6 +11,7 @@ from forms.TurmaForm import TurmaForm, AddAluno
 
 chamada_app = Blueprint("chamada_app", __name__)
 
+
 @chamada_app.route("/", methods=["GET"])
 @login_required
 def home():
@@ -24,6 +25,7 @@ def home():
     sess.close()
 
     return render_template("home.html", current_user=current_user, turmas=minhas_turmas)
+
 
 @chamada_app.route("/add_turma", methods=["GET", "POST"])
 @login_required
@@ -77,31 +79,97 @@ def add_turma():
 @login_required
 def del_turma():
 
-    if not current_user.professor:
-        flash("Usuário não é professor", "danger")
-        return redirect(url_for("chamada_app.home"))
-    
-    id_turma = request.args.get("id_turma")
+    try:
+        id_turma = request.args.get("id_turma")
+        sess = Session()
+        turmas = sess.query(Turmas).filter_by(id_turma=id_turma).all()
+        
+        if current_user.professor and current_user.id in [t.id_user for t in turmas]:
+            chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
+            
+            for c in chamadas:
+                freqs = sess.query(Frequencia).filter_by(id_chamada=c.id).all()
+                for f in freqs:
+                    sess.delete(f)
+                sess.delete(c)
 
+            for t in turmas:
+                sess.delete(t)
+            
+            turma = sess.query(Turma).filter_by(id=id_turma).first()
+            
+            sess.delete(turma)
+            sess.commit()
+            sess.close()
+
+            flash("Turma removida", "success")
+
+            return redirect(url_for("chamada_app.home"))
+        else:
+            flash("Usuário não é professor", "danger")
+        
+    except Exception as e:
+        print("####", e)
+        flash("Erro ao remover turma", "danger")
+    
+    return redirect(url_for("chamada_app.home"))
+
+
+@chamada_app.route("/list_alunos", methods=["GET"])
+@login_required
+def list_alunos():
+    
+    try:
+        id_turma = request.args.get("id_turma")
+        sess = Session()
+        
+        turma_alunos = sess.query(Turmas).filter_by(id_turma=id_turma).all()
+        
+        if current_user.professor and current_user.id in [t.id_user for t in turma_alunos]:
+            alunos = []
+            for t in turma_alunos:
+                alunos.append(sess.query(User).filter_by(id=t.id_user).first())
+            
+            sess.close()
+            
+            return render_template("chamada/list_alunos.html", alunos=alunos, id_turma=id_turma)
+        else:
+            flash("Usuário precisa ser um professor matriculado na turma", "danger")
+    except:
+        flash("Erro ao listar usuarios", "danger")
+        
+    return redirect(url_for("chamada_app.home"))
+
+
+@chamada_app.route("/del_aluno", methods=["GET"])
+@login_required
+def del_aluno():
+    
     try:
         sess = Session()
+        
+        id_aluno = request.args.get("id_aluno")
+        id_turma = request.args.get("id_turma")
+        turma_alunos = sess.query(Turmas).filter_by(id_turma=id_turma).all()
+        
+        if current_user.professor and current_user.id in [t.id_user for t in turma_alunos]:
 
-        turmas = sess.query(Turmas).filter_by(id_turma=id_turma).all()
-        turma = sess.query(Turma).filter_by(id=id_turma).first()
-
-        for t in turmas:
-            sess.delete(t)
-        sess.delete(turma)
-
-        sess.commit()
-        sess.close()
-
-        flash("Turma removida", "success")
-
-        return redirect(url_for("chamada_app.home"))
+            for t in turma_alunos:
+                if t.id_user == int(id_aluno):
+                    sess.delete(t)
+                    sess.commit()
+                    break
+            
+            sess.close()
+            
+            flash("Aluno removido com sucesso", "success")
+        else:
+            flash("Usuário precisa ser um professor matriculado na turma", "danger")
+    
     except:
-        flash("Erro ao remover turma", "danger")
-        return redirect(url_for("chamada_app.home"))
+        flash("Erro ao remover usuario", "danger")
+        
+    return redirect(url_for("chamada_app.home"))
 
 
 @chamada_app.route("/add_aluno", methods=["GET", "POST"])
@@ -113,6 +181,11 @@ def add_aluno():
         return render_template("chamada/add_aluno.html", form=form, id_turma=id_turma)
     
     elif request.method == "POST":
+        
+        if not current_user.professor:
+            flash("Usuário precisa ser um professor", "danger")
+            return redirect(url_for("chamada_app.home"))
+        
         id_turma = request.form.get("id_turma")
         mat = request.form.get("mat")
 
@@ -136,10 +209,10 @@ def add_aluno():
             return redirect(url_for("chamada_app.home"))
         except:
             flash("Erro ao adicionar aluno", "danger")
-            return redirect(url_for("chamada_app.add_aluno"))
     else:
         flash("Token inválido", "danger")
-        return redirect(url_for("chamada_app.add_aluno"))
+        
+    return redirect(url_for("chamada_app.add_aluno"))
 
 
 
@@ -252,6 +325,7 @@ def add_frequencia():
     flash("Frequencia registrada", "success")
     return redirect(url_for("chamada_app.home"))
 
+
 @chamada_app.route("/lista", methods=["GET"])
 @login_required
 def lista():
@@ -267,5 +341,6 @@ def lista():
     
     sess.close()
 
-    return render_template("chamada/lista.html", alunos=alunos, dia=dia)
+    dia = datetime.strptime(dia, "%Y-%m-%d")
+    return render_template("chamada/lista.html", alunos=alunos, dia=dia.strftime("%d/%m/%Y"))
 
