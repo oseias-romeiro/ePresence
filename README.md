@@ -27,6 +27,17 @@ Para o projeto foi utilizado:
   - **Werkzeug**
 
 
+## Algumas telas
+
+- Tela de Login
+
+<img src="static/media/login.png" height="400px">
+
+- Painel do professor
+
+<img src="static/media/home.png" height="400px">
+<br><br>
+
 ## Execução 
 
 ```sh
@@ -34,4 +45,3 @@ Para o projeto foi utilizado:
   python3 app.py
 ```
 
-## Dados 
