@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>
+        {% block title %}Qrcode{% endblock %}
+    </h2>
+    <ul>
+        <li>O código é valido por 10 minutos!</li>
+        <li>Não é possível retornar a essa página depois</li>
+    </ul>
+
+    <img src="/chamada/gen_qrcode?id_chamada={{ id_chamada }}">
+    
+
+{% endblock %}

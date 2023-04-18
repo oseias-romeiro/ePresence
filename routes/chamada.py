@@ -257,19 +257,9 @@ def add_chamada():
                 sess.commit()
 
                 id_chamada = sess.query(Chamada).filter_by(date=dia.date()).first().id
-                expiration = datetime.now() + timedelta(minutes=10)
-                temp_url = url_for("chamada_app.add_frequencia", expiration=expiration, id_chamada=id_chamada, _external=True)
+                
 
-                qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
-                qr.add_data(temp_url)
-                qr.make(fit=True)
-
-                img_buffer = io.BytesIO()
-                img = qr.make_image(fill_color="black", back_color="white")
-                img.save(img_buffer, "PNG")
-                img_buffer.seek(0)
-
-                return Response(img_buffer, mimetype="image/png")
+                return render_template("chamada/qrcode.html", id_chamada=id_chamada)
             
             else:
                 flash("Chamada já foi criada", "info")
@@ -282,6 +272,24 @@ def add_chamada():
     
     return redirect(url_for("chamada_app.home"))
         
+
+@chamada_app.route("/gen_qrcode", methods=["GET"])
+@login_required
+def gen_qrcode():
+    id_chamada = request.args.get("id_chamada")
+    expiration = datetime.now() + timedelta(minutes=10)
+    temp_url = url_for("chamada_app.add_frequencia", expiration=expiration, id_chamada=id_chamada, _external=True)
+
+    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
+    qr.add_data(temp_url)
+    qr.make(fit=True)
+
+    img_buffer = io.BytesIO()
+    img = qr.make_image(fill_color="black", back_color="white")
+    img.save(img_buffer, "PNG")
+    img_buffer.seek(0)
+
+    return Response(img_buffer, mimetype="image/png")
 
 @chamada_app.route("/add_frequencia", methods=["GET"])
 @login_required
