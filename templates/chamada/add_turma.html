@@ -2,18 +2,20 @@
 
 {% block content %}
     <h2>{% block title %}Adicionando{% endblock %} turma</h2>
-    <br>
-    <form method="post" autocomplete="off">
-        {{ form.csrf_token }}
+    
+    <div class="d-flex justify-content-center">
+        <form method="post" autocomplete="off">
+            {{ form.csrf_token }}
 
-        {{ form.name.label }}<br>
-        {{ form.name }}<br>
+            {{ form.name.label }}<br>
+            {{ form.name }}<br>
 
-        <br>
-        <button class="btn btn-dark" type="submit">Adicionar</button>
-        <a href="/chamada">
-            <button class="btn btn-secondary" type="button" class="btn-cancel">Cancel</button>
-        </a>
-    </form>
+            <br>
+            <button class="btn btn-success" type="submit">Adicionar</button>
+            <a href="/chamada">
+                <button class="btn btn-warning" type="button" class="btn-cancel">Cancelar</button>
+            </a>
+        </form>
+    </div>
 
 {% endblock %}

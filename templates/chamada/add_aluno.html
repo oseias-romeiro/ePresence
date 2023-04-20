@@ -2,20 +2,22 @@
 
 {% block content %}
     <h2>{% block title %}Adicionando{% endblock %} aluno</h2>
-    <br>
-    <form method="post" autocomplete="off">
-        {{ form.csrf_token }}
+    
+    <div class="d-flex justify-content-center">
+        <form method="post" autocomplete="off">
+            {{ form.csrf_token }}
 
-        {{ form.mat.label }}<br>
-        {{ form.mat }}<br>
+            {{ form.mat.label }}<br>
+            {{ form.mat }}<br>
 
-        <input hidden type="text" name="id_turma" value="{{ id_turma }}">
+            <input hidden type="text" name="id_turma" value="{{ id_turma }}">
 
-        <br>
-        <button class="btn btn-dark" type="submit">Adicionar</button>
-        <a href="/chamada">
-            <button class="btn btn-secondary" type="button" class="btn-cancel">Cancel</button>
-        </a>
-    </form>
+            <br>
+            <button class="btn btn-success" type="submit">Adicionar</button>
+            <a href="/chamada">
+                <button class="btn btn-warning" type="button" class="btn-cancel">Cancelar</button>
+            </a>
+        </form>
+    </div>
 
 {% endblock %}

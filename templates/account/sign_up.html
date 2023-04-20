@@ -1,31 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>{% block title %}Sing up{% endblock %}</h2>
-    <br>
-    <form method="post" autocomplete="off" style="max-width: 350px;;">
-        {{ form.csrf_token }}
+    <h2>{% block title %}Cadastro{% endblock %}</h2>
+    
+    <div class="d-flex justify-content-center">
+        <form method="post" autocomplete="off" style="max-width: 350px;">
+            {{ form.csrf_token }}
 
-        {{ form.matricula.label }}<br>
-        {{ form.matricula(class_="form-control") }}<br>
+            {{ form.matricula.label }}<br>
+            {{ form.matricula(class_="form-control") }}<br>
 
-        {{ form.name.label }}<br>
-        {{ form.name(class_="form-control") }}<br>
+            {{ form.name.label }}<br>
+            {{ form.name(class_="form-control") }}<br>
 
-        {{ form.password1.label }}<br>
-        {{ form.password1(class_="form-control") }}<br>
+            {{ form.password1.label }}<br>
+            {{ form.password1(class_="form-control") }}<br>
 
-        {{ form.password2.label }}<br>
-        {{ form.password2(class_="form-control") }}<br>
+            {{ form.password2.label }}<br>
+            {{ form.password2(class_="form-control") }}<br>
 
-        {{ form.professor.label }}<br>
-        {{ form.professor }}<br>
+            {{ form.professor.label }}<br>
+            {{ form.professor }}<br>
 
-        <br>
-        <button class="btn btn-dark" type="submit">Sign up</button>
-        <a href="/account/sign_in">
-            <button class="btn btn-secondary" type="button" class="btn-cancel">Cancel</button>
-        </a>
-    </form>
+            <br>
+            <button class="btn btn-success" type="submit">Cadastrar</button>
+            <a href="/account/sign_in">
+                <button class="btn btn-warning" type="button" class="btn-cancel">Cancelar</button>
+            </a>
+        </form>
+    </div>
 
 {% endblock %}

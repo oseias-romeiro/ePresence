@@ -4,34 +4,33 @@
     <h2>
         {% block title %}Bem vindo{% endblock %}, {{ current_user.name }}.
     </h2>
-    <br>
-    <table class="table">
-        <tr>
-            <th>Turmas</th>
-            <th>Action</th>
-        </tr>
+    
+    <h3>Turmas</h3>
+
+    <ul class="list-group">
         {% for t in turmas %}
-            <tr>
-                <td>{{ t.name }}</td>
-                {% if current_user.professor %}
-                <td>
-                    <a href="/chamada/list_alunos?id_turma={{ t.id }}" style="text-decoration: none;">
-                        <button class="btn btn-light">Alunos</button>
-                    </a>
-                    <a href="/chamada/del_turma?id_turma={{ t.id }}" style="text-decoration: none;">
-                        <button class="btn btn-light">Remover Turma</button>
-                    </a>
-                    <a href="/chamada/frequencias?id_turma={{ t.id }}" style="text-decoration: none;">
-                        <button class="btn btn-light">Frequencia</button>
-                    </a>
-                </td>
-                {% else %}
-                <td>
+        <li class="list-group-item">
+                {{ t.name }}
+                <div style="float: right;">
+                    {% if current_user.professor %}
+                    <div class="dropdown dropstart">
+                        <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        ...
+                        </button>
+                        <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/chamada/list_alunos?id_turma={{ t.id }}">Alunos</a></li>
+                        <li><a class="dropdown-item" href="/chamada/del_turma?id_turma={{ t.id }}">Remover</a></li>
+                        <li><a class="dropdown-item" href="/chamada/frequencias?id_turma={{ t.id }}">Frequencia</a></li>
+                        </ul>
+                    </div>
+                    {% else %}
                     <a href="/chamada/frequencias?id_turma={{ t.id }}">Frequencia</a>
-                </td>
-                {% endif %}
-            </tr>
+                    {% endif %}
+                </div>
+            </div>
+            
+        </li>
         {% endfor %}
-    </table>
+    </ul>
 
 {% endblock %}

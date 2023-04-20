@@ -2,12 +2,9 @@
 
 {% block content %}
 
-    <div class="center">
+    <h2>{% block title %}Login{% endblock %}</h2>
 
-        <h2>{% block title %}Sing in{% endblock %}</h2>
-        <br>
-
-        
+    <div class="d-flex justify-content-center">
         <form method="post" autocomplete="off" style="max-width: 350px;">
             {{ form.csrf_token }}
 
@@ -17,12 +14,12 @@
             {{ form.password.label }}<br>
             {{ form.password(class_="form-control") }}<br>
             <br>
-            <button class="btn btn-dark" type="submit">Login</button>
+            <button class="btn btn-success" type="submit">Login</button>
             <a href="/">
-                <button class="btn btn-secondary" type="button" class="btn-cancel">Cancel</button>
+                <button class="btn btn-warning" type="button" class="btn-cancel">Cancelar</button>
             </a>
             <br>
-            <a href="/account/sign_up">Create account</a>
+            <a href="/account/sign_up">Criar conta</a>
         </form>
     </div>
     

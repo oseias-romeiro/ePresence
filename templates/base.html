@@ -11,30 +11,30 @@
     <link rel="shortcut icon" href="/static/media/icon.png" type="image/png">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">ChamadaEletronica</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <a class="navbar-brand" href="#" style="padding-left: 10px;">ChamadaEletronica</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuItems" aria-controls="menuItems" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="menuItems">
-            <ul class="navbar-nav">
+            <ul class="navbar-nav" style="padding-left: 10px;">
                 <li class="nav-item">
                     <a class="nav-link" href="/">Home</a>
                 </li>
                 {% if not current_user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/account/sign_in">Sing in</a>
+                    <a class="nav-link" href="/account/sign_in">Login</a>
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/account/profile">Porfile</a>
+                    <a class="nav-link" href="/account/profile">Perfil</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/account/logout">Logout</a>
                 </li>
                 {% if current_user.professor %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/chamada/add_turma">Add turma</a>
+                    <a class="nav-link" href="/chamada/add_turma">Criar turma</a>
                 </li>
                 {% endif %}
                 {% endif %}
