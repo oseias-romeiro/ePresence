@@ -9,11 +9,13 @@
         <tr>
             <th>Matricula</th>
             <th>Nome</th>
+            <th>Distancia</th>
         </tr>
         {% for a in alunos %}
             <tr>
-                <td>{{ a.matricula }}</td>
-                <td>{{ a.name }}</td>
+                <td>{{ a[0].matricula }}</td>
+                <td>{{ a[0].name }}</td>
+                <td>{{ a[1] if a[1] else '' }}</td>
             </tr>
         {% endfor %}
     </table>

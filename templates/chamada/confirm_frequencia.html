@@ -1,0 +1,40 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>
+        {% block title %}Confirmação{% endblock %} de frequencia
+    </h2>
+    <br>
+    
+    <div class="d-flex justify-content-center">
+        <form id="confirm_freq" action="/chamada/add_frequencia?expiration={{ expiration }}&id_chamada={{ id_chamada }}" method="post">
+            <button class="btn btn-success" type="submit">Confirmar</button>
+        </form>
+    </div>
+
+    <script>
+        let form = document.getElementById("confirm_freq")
+        var lat, lon = "";
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position)=>{
+                    lat = position.coords.latitude;
+                    lon = position.coords.longitude;
+
+                    form.setAttribute("action", form.getAttribute("action")+`&lat=${lat}&lon=${lon}`);
+
+                    console.log(lat, lon);
+                },
+                (err) => {
+                    console.log(err.message);
+                    alert("Erro ao obter localização!");
+                }
+            );
+        } else {
+            alert("Navegador não suporta geolocalização!");
+        }
+    </script>
+
+{% endblock %}
+

@@ -7,7 +7,7 @@ import qrcode, io
 from db import Session, professor_required
 from models.User import User, Turmas, Turma, Frequencia, Chamada
 from forms.TurmaForm import TurmaForm, AddAluno
-
+from api.GeoDB import get_nearby_cities, get_distance
 
 chamada_app = Blueprint("chamada_app", __name__)
 
@@ -242,7 +242,14 @@ def frequencias():
 @login_required
 def add_chamada():
     id_turma = request.args.get("id_turma")
+    lat = request.args.get("lat")
+    lon = request.args.get("lon")
+
+    geoloc=None
+    if lat and lon:
+        geoloc = get_nearby_cities(lat,lon)
     
+
     if professor_required(current_user, id_turma):
         try:
             sess = Session()
@@ -251,7 +258,8 @@ def add_chamada():
             if len(ch) == 0:
                 chamada = Chamada(
                     date = dia.date(),
-                    id_turma = id_turma
+                    id_turma = id_turma,
+                    location = geoloc if geoloc else None
                 )
                 sess.add(chamada)
                 sess.commit()
@@ -291,32 +299,46 @@ def gen_qrcode():
 
     return Response(img_buffer, mimetype="image/png")
 
-@chamada_app.route("/add_frequencia", methods=["GET"])
+@chamada_app.route("/add_frequencia", methods=["GET", "POST"])
 @login_required
 def add_frequencia():
     expiration = request.args.get("expiration")
     id_chamada = request.args.get("id_chamada")
 
-    if expiration is not None:
-        expiration = datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
-        if datetime.now() > expiration:
-            flash("Código expirado", "danger")
-            return redirect(url_for("chamada_app.home"))
-
-    freq = Frequencia(
-        id_user = current_user.id,
-        id_chamada = id_chamada
-    )
-    try:
-        with Session() as sess:
-            sess.add(freq)
-            sess.commit()
-            
-        flash("Frequencia registrada", "success")
-    except:
-        flash("Houve um erro registrar frequencia", "danger")
+    if request.method == "GET":
+        return render_template("chamada/confirm_frequencia.html", expiration=expiration, id_chamada=id_chamada)
     
-    return redirect(url_for("chamada_app.home"))
+    elif request.method == "POST":
+        lat = request.args.get("lat")
+        lon = request.args.get("lon")
+
+        geoloc=None
+        if lat and lon:
+            geoloc = get_nearby_cities(lat,lon)
+        
+        print("###", lat, lon, geoloc)
+
+        if expiration is not None:
+            expiration = datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
+            if datetime.now() > expiration:
+                flash("Código expirado", "danger")
+                return redirect(url_for("chamada_app.home"))
+
+        freq = Frequencia(
+            id_user = current_user.id,
+            id_chamada = id_chamada,
+            location = geoloc if geoloc else None
+        )
+        try:
+            with Session() as sess:
+                sess.add(freq)
+                sess.commit()
+                
+            flash("Frequencia registrada", "success")
+        except:
+            flash("Houve um erro registrar frequencia", "danger")
+        
+        return redirect(url_for("chamada_app.home"))
 
 
 @chamada_app.route("/lista", methods=["GET"])
@@ -327,11 +349,18 @@ def lista():
 
     try:
         sess = Session()
+        chamada = sess.query(Chamada).filter_by(id=id_chamada).first()
         frequencias_list = sess.query(Frequencia).filter_by(id_chamada=id_chamada).all()
         
         alunos = []
         for f in frequencias_list:
-            alunos.append(sess.query(User).filter_by(id=f.id_user).first())
+            dist=None
+            if f.location and chamada.location:
+                dist = get_distance(
+                    (f.location["latitude"], f.location["longitude"]),
+                    (chamada.location["latitude"], chamada.location["longitude"])
+                )
+            alunos.append((sess.query(User).filter_by(id=f.id_user).first(), dist))
         
         sess.close()
     except:
