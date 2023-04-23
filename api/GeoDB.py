@@ -5,7 +5,7 @@ from math import sqrt
 
 URL = "https://wft-geo-db.p.rapidapi.com/v1/geo"
 HEADERS = {
-    'X-RapidAPI-Key': '926d16ce17mshf66b9c1208529cdp1713d6jsn534dc5f8e0aa', # getenv("RAPID_KEY")
+    'X-RapidAPI-Key': getenv("RAPID_KEY"),
     'X-RapidAPI-Host': 'wft-geo-db.p.rapidapi.com'
 }
 
