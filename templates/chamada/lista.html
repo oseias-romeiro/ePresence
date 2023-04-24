@@ -9,11 +9,17 @@
         <tr>
             <th>Matricula</th>
             <th>Nome</th>
+            <th>Distancia</th>
+            <th>Action</th>
         </tr>
         {% for a in alunos %}
             <tr>
-                <td>{{ a.matricula }}</td>
-                <td>{{ a.name }}</td>
+                <td>{{ a[0].matricula }}</td>
+                <td>{{ a[0].name }}</td>
+                <td>{{ a[1] if a[1]!=None else '' }}</td>
+                <td>
+                    <a href="/chamada/rejeitar_freq?id_user={{ a[0].id }}&id_chamada={{ id_chamada }}">Rejeitar</a>
+                </td>
             </tr>
         {% endfor %}
     </table>

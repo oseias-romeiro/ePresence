@@ -7,7 +7,20 @@ Projeto de Engenharia de Software: Proposta de solução para uma versão eletr�
 
 ## Descrição
 
-Neste projeto foi criado 5 entidades (user, turma, turmas, chamada, frequencias), nos quais ligam entre si e permite ao usuário-professor criar turmas, adicionar outros usuários-alunos e criar chamada para o dia. O usuário-aluno, pode responder a frequencia, se o professor já ter criado a chamada para o dia, utilizando o qrcode disponível para o professor. O projeto está utilizando sqlite, com os seguintes dados de exemplos:
+Neste projeto foi criado 5 entidades (user, turma, turmas, chamada, frequencias), nos quais ligam entre si e permite ao usuário-professor criar turmas, adicionar outros usuários-alunos e criar chamada para o dia. O usuário-aluno, pode responder a frequencia, se o professor já ter criado a chamada para o dia, utilizando o qrcode disponível para o professor.
+
+## Ferramentas
+
+Para o projeto foi utilizado:
+  - **Flask**
+  - **sqlite3**
+  - **SQLAlchemy**
+  - **Werkzeug**
+  - **GeoDB**
+
+### Dados
+
+O projeto está utilizando sqlite, com os seguintes dados de exemplos:
 
 |Matricula|Professor|
 |--- |--- |
@@ -18,14 +31,17 @@ Neste projeto foi criado 5 entidades (user, turma, turmas, chamada, frequencias)
 
 > Todas as senhas são `1234`
 
-## Ferramentas
+### APIs
 
-Para o projeto foi utilizado:
-  - **Flask**
-  - **sqlite3**
-  - **SQLAlchemy**
-  - **Werkzeug**
+Foi utilizado a api GeoDB para obter informações de coordenadas coletadas pela api Geolocation no navegador do usuário. Os dados são salvos e utilizados para registrar a posição do professor quando uma chamada é criada e calculo de distância quando um aluno responde a chamada. A diferença é mostrada para o professor, podendo ele rejeitar a presença do aluno.
 
+> É opcional a utilização da API e não é obrigatório autorizar a geolocalização para o aluno responder a chamada.
+
+### Env
+
+Variaveis de ambiente são declarados em `.env`
+
+- **RAPID_KEY** : deve manter a chave rapid para a utilização da api
 
 ## Algumas telas
 

@@ -7,7 +7,7 @@ import qrcode, io
 from db import Session, professor_required
 from models.User import User, Turmas, Turma, Frequencia, Chamada
 from forms.TurmaForm import TurmaForm, AddAluno
-
+from api.GeoDB import get_nearby_cities, get_distance
 
 chamada_app = Blueprint("chamada_app", __name__)
 
@@ -242,7 +242,14 @@ def frequencias():
 @login_required
 def add_chamada():
     id_turma = request.args.get("id_turma")
+    lat = request.args.get("lat")
+    lon = request.args.get("lon")
+
+    geoloc=None
+    if lat and lon:
+        geoloc = get_nearby_cities(lat,lon)
     
+
     if professor_required(current_user, id_turma):
         try:
             sess = Session()
@@ -251,7 +258,8 @@ def add_chamada():
             if len(ch) == 0:
                 chamada = Chamada(
                     date = dia.date(),
-                    id_turma = id_turma
+                    id_turma = id_turma,
+                    location = geoloc if geoloc else None
                 )
                 sess.add(chamada)
                 sess.commit()
@@ -279,6 +287,7 @@ def gen_qrcode():
     id_chamada = request.args.get("id_chamada")
     expiration = datetime.now() + timedelta(minutes=10)
     temp_url = url_for("chamada_app.add_frequencia", expiration=expiration, id_chamada=id_chamada, _external=True)
+    print("# url temporária:", temp_url)
 
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
     qr.add_data(temp_url)
@@ -291,32 +300,44 @@ def gen_qrcode():
 
     return Response(img_buffer, mimetype="image/png")
 
-@chamada_app.route("/add_frequencia", methods=["GET"])
+@chamada_app.route("/add_frequencia", methods=["GET", "POST"])
 @login_required
 def add_frequencia():
     expiration = request.args.get("expiration")
     id_chamada = request.args.get("id_chamada")
 
-    if expiration is not None:
-        expiration = datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
-        if datetime.now() > expiration:
-            flash("Código expirado", "danger")
-            return redirect(url_for("chamada_app.home"))
-
-    freq = Frequencia(
-        id_user = current_user.id,
-        id_chamada = id_chamada
-    )
-    try:
-        with Session() as sess:
-            sess.add(freq)
-            sess.commit()
-            
-        flash("Frequencia registrada", "success")
-    except:
-        flash("Houve um erro registrar frequencia", "danger")
+    if request.method == "GET":
+        return render_template("chamada/confirm_frequencia.html", expiration=expiration, id_chamada=id_chamada)
     
-    return redirect(url_for("chamada_app.home"))
+    elif request.method == "POST":
+        lat = request.form.get("lat")
+        lon = request.form.get("lon")
+
+        geoloc=None
+        if lat and lon:
+            geoloc = get_nearby_cities(lat,lon)
+
+        if expiration is not None:
+            expiration = datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
+            if datetime.now() > expiration:
+                flash("Código expirado", "danger")
+                return redirect(url_for("chamada_app.home"))
+
+        freq = Frequencia(
+            id_user = current_user.id,
+            id_chamada = id_chamada,
+            location = geoloc if geoloc else None
+        )
+        try:
+            with Session() as sess:
+                sess.add(freq)
+                sess.commit()
+                
+            flash("Frequencia registrada", "success")
+        except:
+            flash("Houve um erro registrar frequencia", "danger")
+        
+        return redirect(url_for("chamada_app.home"))
 
 
 @chamada_app.route("/lista", methods=["GET"])
@@ -327,17 +348,50 @@ def lista():
 
     try:
         sess = Session()
+        chamada = sess.query(Chamada).filter_by(id=id_chamada).first()
         frequencias_list = sess.query(Frequencia).filter_by(id_chamada=id_chamada).all()
         
         alunos = []
         for f in frequencias_list:
-            alunos.append(sess.query(User).filter_by(id=f.id_user).first())
-        
+            dist=None
+            if f.location and chamada.location:
+                dist = get_distance(
+                    (f.location["latitude"], f.location["longitude"]),
+                    (chamada.location["latitude"], chamada.location["longitude"])
+                )
+            alunos.append((
+                sess.query(User).filter_by(id=f.id_user).first(),
+                dist
+            ))
+            print("@@@@@@", f.location, chamada.location, dist)
         sess.close()
     except:
         flash("Houve um erro ao coletar a lista de frequecia", "danger")
         return redirect(url_for("chamada_app.home"))
 
     dia = datetime.strptime(dia, "%Y-%m-%d")
-    return render_template("chamada/lista.html", alunos=alunos, dia=dia.strftime("%d/%m/%Y"))
+    return render_template("chamada/lista.html", alunos=alunos, dia=dia.strftime("%d/%m/%Y"), id_chamada=id_chamada)
+
+
+@chamada_app.route("/rejeitar_freq", methods=["GET"])
+@login_required
+def rejeitar_freq():
+    id_user = request.args.get("id_user")
+    id_chamada = request.args.get("id_chamada")
+
+    try:
+        sess = Session()
+        frequencias_list = sess.query(Frequencia).filter_by(id_user=id_user, id_chamada=id_chamada).all()
+        
+        for f in frequencias_list:
+            sess.delete(f)
+        
+        sess.commit()
+        sess.close()
+
+        flash("Frequencia rejeitada com sucesso", "success")
+        return redirect(url_for("chamada_app.home"))
+    except:
+        flash("Houve um erro rejeitar a frequencia", "danger")
+        return redirect(url_for("chamada_app.home"))
 

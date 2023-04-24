@@ -1,5 +1,6 @@
 from flask import Flask, redirect, url_for, flash
 from flask_login import LoginManager
+from os import getenv
 
 from routes import account, chamada
 from models.User import User, Base
@@ -42,6 +43,9 @@ def custom_404(error):
 if __name__ == "__main__":
     # creating tables
     Base.metadata.create_all(engine)
+
+    # api
+    if not getenv("RAPID_KEY"): print("A chave da api GeoDB não foi encontrada")
 
     # run flask app
     app.run(
