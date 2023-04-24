@@ -8,21 +8,22 @@
     <br>
     
     <div class="d-flex justify-content-center">
-        <form id="confirm_freq" action="/chamada/add_frequencia?expiration={{ expiration }}&id_chamada={{ id_chamada }}" method="post">
+        <form action="/chamada/add_frequencia?expiration={{ expiration }}&id_chamada={{ id_chamada }}" method="post">
+            <input id="lat" type="text" name="lat" value="">
+            <input id="lon" type="text" name="lon" value="">
             <button class="btn btn-success" type="submit">Confirmar</button>
         </form>
     </div>
 
     <script>
-        let form = document.getElementById("confirm_freq")
-        var lat, lon = "";
+        const lat = document.getElementById("lat")
+        const lon = document.getElementById("lon")
+
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 (position)=>{
-                    lat = position.coords.latitude;
-                    lon = position.coords.longitude;
-
-                    form.setAttribute("action", form.getAttribute("action")+`&lat=${lat}&lon=${lon}`);
+                    lat.value = position.coords.latitude;
+                    lon.value = position.coords.longitude;
 
                     console.log(lat, lon);
                 },

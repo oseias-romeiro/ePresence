@@ -2,10 +2,11 @@ from requests import request
 from os import getenv
 from math import sqrt
 
+key = getenv("RAPID_KEY")
 
 URL = "https://wft-geo-db.p.rapidapi.com/v1/geo"
 HEADERS = {
-    'X-RapidAPI-Key': getenv("RAPID_KEY"),
+    'X-RapidAPI-Key': key,
     'X-RapidAPI-Host': 'wft-geo-db.p.rapidapi.com'
 }
 
@@ -18,6 +19,8 @@ def get_nearby_cities(lat, lon) -> dict:
     """
         Retorna dados da cidade mais próxima de uma coordenada dada
     """
+    if not key: return "" # caso a chave não seja declarado
+
     url = URL+f"/locations/{lat}{lon}/nearbyCities"
     params = {"radius": "100"}
 

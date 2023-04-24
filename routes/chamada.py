@@ -287,6 +287,7 @@ def gen_qrcode():
     id_chamada = request.args.get("id_chamada")
     expiration = datetime.now() + timedelta(minutes=10)
     temp_url = url_for("chamada_app.add_frequencia", expiration=expiration, id_chamada=id_chamada, _external=True)
+    print("# url temporária:", temp_url)
 
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
     qr.add_data(temp_url)
@@ -309,14 +310,12 @@ def add_frequencia():
         return render_template("chamada/confirm_frequencia.html", expiration=expiration, id_chamada=id_chamada)
     
     elif request.method == "POST":
-        lat = request.args.get("lat")
-        lon = request.args.get("lon")
+        lat = request.form.get("lat")
+        lon = request.form.get("lon")
 
         geoloc=None
         if lat and lon:
             geoloc = get_nearby_cities(lat,lon)
-        
-        print("###", lat, lon, geoloc)
 
         if expiration is not None:
             expiration = datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
@@ -360,13 +359,39 @@ def lista():
                     (f.location["latitude"], f.location["longitude"]),
                     (chamada.location["latitude"], chamada.location["longitude"])
                 )
-            alunos.append((sess.query(User).filter_by(id=f.id_user).first(), dist))
-        
+            alunos.append((
+                sess.query(User).filter_by(id=f.id_user).first(),
+                dist
+            ))
+            print("@@@@@@", f.location, chamada.location, dist)
         sess.close()
     except:
         flash("Houve um erro ao coletar a lista de frequecia", "danger")
         return redirect(url_for("chamada_app.home"))
 
     dia = datetime.strptime(dia, "%Y-%m-%d")
-    return render_template("chamada/lista.html", alunos=alunos, dia=dia.strftime("%d/%m/%Y"))
+    return render_template("chamada/lista.html", alunos=alunos, dia=dia.strftime("%d/%m/%Y"), id_chamada=id_chamada)
+
+
+@chamada_app.route("/rejeitar_freq", methods=["GET"])
+@login_required
+def rejeitar_freq():
+    id_user = request.args.get("id_user")
+    id_chamada = request.args.get("id_chamada")
+
+    try:
+        sess = Session()
+        frequencias_list = sess.query(Frequencia).filter_by(id_user=id_user, id_chamada=id_chamada).all()
+        
+        for f in frequencias_list:
+            sess.delete(f)
+        
+        sess.commit()
+        sess.close()
+
+        flash("Frequencia rejeitada com sucesso", "success")
+        return redirect(url_for("chamada_app.home"))
+    except:
+        flash("Houve um erro rejeitar a frequencia", "danger")
+        return redirect(url_for("chamada_app.home"))
 
