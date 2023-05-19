@@ -1,18 +1,17 @@
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String
 from flask_login import UserMixin
 
-Base = declarative_base()
+from db import db
 
-
-class User(UserMixin, Base):
+class User(UserMixin, db.Model):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
-    matricula = Column(String(9), nullable=False, unique=True)
-    name = Column(String(127), nullable=False)
-    password = Column(String(127), nullable=False)
-    professor = Column(Boolean, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    matricula: Mapped[str] = mapped_column(String(9), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(127), nullable=False)
+    password: Mapped[str] = mapped_column(String(127), nullable=False)
+    professor: Mapped[bool] = mapped_column(nullable=False)
 
     def __repr__(self):
         return "mat: %r" % self.matricula

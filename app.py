@@ -2,9 +2,10 @@ from flask import Flask, redirect, url_for, flash
 from flask_login import LoginManager
 from os import getenv
 
+from db import engine, Session, db
+from models.User import User
 from controllers import account, chamada
-from models.User import User, Base
-from db import engine, Session
+
 
 app = Flask(__name__)
 app.secret_key = "s3cr3t"
@@ -42,10 +43,7 @@ def custom_404(error):
 
 if __name__ == "__main__":
     # creating tables
-    Base.metadata.create_all(engine)
-
-    # api
-    if not getenv("RAPID_KEY"): print("A chave da api GeoDB não foi encontrada")
+    db.metadata.create_all(engine)
 
     # run flask app
     app.run(

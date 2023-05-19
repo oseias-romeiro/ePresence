@@ -1,8 +1,8 @@
 from requests import request
-from os import getenv
 from math import sqrt
+from config import config
 
-key = getenv("RAPID_KEY")
+key = config.RAPID_KEY
 
 URL = "https://wft-geo-db.p.rapidapi.com/v1/geo"
 HEADERS = {

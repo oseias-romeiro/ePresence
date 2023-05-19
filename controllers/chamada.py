@@ -4,10 +4,11 @@ from flask_login import current_user
 from datetime import datetime, timedelta
 import qrcode, io
 
-from db import Session, professor_required
+from db import Session
 from models.User import User
 from models.Turma import Turma, Turmas
 from models.Chamada import Chamada, Frequencia
+from help.required import professor_required
 from forms.TurmaForm import TurmaForm, AddAluno
 from api.GeoDB import get_nearby_cities, get_distance
 

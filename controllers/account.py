@@ -60,6 +60,7 @@ def sign_up():
 
             return redirect(url_for("account_app.sign_in"))
         except Exception as e:
+            print(e)
             flash("Entradas inválidas", "danger")
             return redirect(url_for("account_app.sign_up"))
     else:

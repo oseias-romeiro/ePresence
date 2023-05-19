@@ -1,33 +1,33 @@
-from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, Integer, ForeignKey, Date, JSON, UniqueConstraint
+from datetime import datetime
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import ForeignKey, UniqueConstraint, JSON
 
 from models.Turma import Turma
 from models.User import User
-
-Base = declarative_base()
-
-
-class Chamada(Base):
-    __tablename__ = "chamada"
-
-    id = Column(Integer, primary_key=True)
-    date = Column(Date, nullable=False, unique=True)
-    id_turma = Column(Integer, ForeignKey(Turma.id))
-    location = Column(JSON, nullable=True)
-
-    turma = relationship('Turma', foreign_keys='Chamada.id_turma')
+from db import db
 
 
-class Frequencia(Base):
-    __tablename__ = "frequencia"
+class Chamada(db.Model):
+    __tablename__ = "chamadas"
 
-    id = Column(Integer, primary_key=True)
-    id_user = Column(Integer, ForeignKey(User.id))
-    id_chamada = Column(Integer, ForeignKey(Chamada.id))
-    location = Column(JSON, nullable=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    date: Mapped[datetime] = mapped_column(nullable=False, unique=True)
+    id_turma: Mapped[int] = mapped_column(ForeignKey("turma.id"))
+    location: Mapped[dict] = mapped_column(JSON, nullable=True)
+
+    turma: Mapped["Turma"] = relationship(foreign_keys="Chamada.id_turma")
+
+
+class Frequencia(db.Model):
+    __tablename__ = "frequencias"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    id_user: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    id_chamada: Mapped[int] = mapped_column(ForeignKey("chamadas.id"))
+    location: Mapped[dict] = mapped_column(JSON, nullable=True)
 
     __table_args__ = (UniqueConstraint(id_user, id_chamada, name="constUserChamada"),)
 
-    user = relationship('User', foreign_keys='Frequencia.id_user')
-    chamada = relationship('Chamada', foreign_keys='Frequencia.id_chamada')
+    user: Mapped["User"] = relationship(foreign_keys="Frequencia.id_user")
+    chamada: Mapped["Chamada"] = relationship(foreign_keys="Frequencia.id_chamada")
 
