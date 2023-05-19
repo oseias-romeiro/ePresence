@@ -27,7 +27,9 @@ def home():
     
     sess.close()
 
-    return render_template("home.html", current_user=current_user, turmas=minhas_turmas)
+    form_turma = TurmaForm()
+
+    return render_template("home.html", current_user=current_user, turmas=minhas_turmas, form_turma=form_turma)
 
 
 @chamada_app.route("/add_turma", methods=["GET", "POST"])

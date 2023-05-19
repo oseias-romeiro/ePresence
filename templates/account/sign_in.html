@@ -2,10 +2,11 @@
 
 {% block content %}
 
-    <h2>{% block title %}Login{% endblock %}</h2>
-
     <div class="d-flex justify-content-center">
-        <form method="post" autocomplete="off" style="max-width: 350px;">
+        <form method="post" autocomplete="off" style="width: 500px;">
+            <h2 style="text-align: center;">{% block title %}Login{% endblock %}</h2>
+            <br>
+
             {{ form.csrf_token }}
 
             {{ form.matricula.label }}<br>
@@ -14,12 +15,15 @@
             {{ form.password.label }}<br>
             {{ form.password(class_="form-control") }}<br>
             <br>
-            <button class="btn btn-success" type="submit">Login</button>
-            <a href="/">
-                <button class="btn btn-warning" type="button" class="btn-cancel">Cancelar</button>
-            </a>
-            <br>
-            <a href="/account/sign_up">Criar conta</a>
+
+            <div style="text-align: center;">
+                <button class="btn btn-success" type="submit">Login</button>
+                <a href="/">
+                    <button class="btn btn-warning" type="button" class="btn-cancel">Cancelar</button>
+                </a>
+                <br>
+                <a href="/account/sign_up">Criar conta</a>
+            </div>
         </form>
     </div>
     

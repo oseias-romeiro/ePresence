@@ -4,12 +4,22 @@
     <h2>
         {% block title %}Bem vindo{% endblock %}, {{ current_user.name }}.
     </h2>
-    
-    <h3>Turmas</h3>
+    <br>
 
     <ul class="list-group">
-        {% for t in turmas %}
-        <li class="list-group-item">
+        <li class="list-group-item active">Turmas
+            <div style="float: right;">
+                {% if current_user.professor %}
+                <!-- Button trigger newTurmaModal -->
+                <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#newTurmaModal">
+                    Criar turma
+                </button>
+                {% endif %}
+            </div>
+        </li>
+        {% if turmas %}
+            {% for t in turmas %}
+            <li class="list-group-item">
                 {{ t.name }}
                 <div style="float: right;">
                     {% if current_user.professor %}
@@ -27,10 +37,34 @@
                     <a href="/chamada/frequencias?id_turma={{ t.id }}">Frequencia</a>
                     {% endif %}
                 </div>
-            </div>
-            
-        </li>
-        {% endfor %}
+            </li>
+            {% endfor %}
+        {% else %}
+        <h4>Você não está cadastrado em nenhuma turma!</h4>
+        {% endif %}
     </ul>
+  
+    <!-- Modal: create class -->
+    <div class="modal fade" id="newTurmaModal" tabindex="-1" role="dialog" aria-labelledby="newTurmaModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="newTurmaModalLabel">Nova turma</h5>
+            </div>
+            <form method="post" action="/chamada/add_turma" autocomplete="off">
+                <div class="modal-body">
+                    {{ form_turma.csrf_token }}
+        
+                    {{ form_turma.name.label }}<br>
+                    {{ form_turma.name(class_="form-control") }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Criar</button>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
 
 {% endblock %}

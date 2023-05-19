@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>{% block title %}Cadastro{% endblock %}</h2>
     
     <div class="d-flex justify-content-center">
-        <form method="post" autocomplete="off" style="max-width: 350px;">
+        <form method="post" autocomplete="off" style="width: 500px;">
+            <h2 style="text-align: center;">{% block title %}Cadastro{% endblock %}</h2>
+
             {{ form.csrf_token }}
 
             {{ form.matricula.label }}<br>
@@ -19,14 +20,15 @@
             {{ form.password2.label }}<br>
             {{ form.password2(class_="form-control") }}<br>
 
-            {{ form.professor.label }}<br>
-            {{ form.professor }}<br>
+            {{ form.professor.label }}: {{ form.professor }}<br>
 
             <br>
-            <button class="btn btn-success" type="submit">Cadastrar</button>
-            <a href="/account/sign_in">
-                <button class="btn btn-warning" type="button" class="btn-cancel">Cancelar</button>
-            </a>
+            <div style="text-align: center;">
+                <button class="btn btn-success" type="submit">Cadastrar</button>
+                <a href="/account/sign_in">
+                    <button class="btn btn-warning" type="button" class="btn-cancel">Cancelar</button>
+                </a>
+            </div>
         </form>
     </div>
 

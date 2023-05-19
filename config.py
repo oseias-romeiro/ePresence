@@ -24,7 +24,7 @@ class Config(Base):
     def development(self):
         print("# Development environment")
         self.DB_URI = f"sqlite:///{self.PATH}/flask_template_db.sqlite"
-        self.SECRET_KEY = uuid4()
+        self.SECRET_KEY = str(uuid4())
 
 
 config = Config()
