@@ -5,7 +5,9 @@ from datetime import datetime, timedelta
 import qrcode, io
 
 from db import Session, professor_required
-from models.User import User, Turmas, Turma, Frequencia, Chamada
+from models.User import User
+from models.Turma import Turma, Turmas
+from models.Chamada import Chamada, Frequencia
 from forms.TurmaForm import TurmaForm, AddAluno
 from api.GeoDB import get_nearby_cities, get_distance
 

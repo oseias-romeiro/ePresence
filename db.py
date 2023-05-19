@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import pathlib
 
-from models.User import Turmas
+from models.Turma import Turmas
 
 PATH = pathlib.Path(__file__).parent.resolve()
 

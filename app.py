@@ -2,7 +2,7 @@ from flask import Flask, redirect, url_for, flash
 from flask_login import LoginManager
 from os import getenv
 
-from routes import account, chamada
+from controllers import account, chamada
 from models.User import User, Base
 from db import engine, Session
 
