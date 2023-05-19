@@ -1,3 +1,9 @@
+# Python
 **/__pycache__/**
+
+# IDEs
 .idea/**
 .vscode/**
+
+# files
+.env

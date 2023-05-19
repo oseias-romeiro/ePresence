@@ -1,14 +1,14 @@
 from flask import Flask, redirect, url_for, flash
 from flask_login import LoginManager
-from os import getenv
 
+from config import config
 from db import engine, Session, db
 from models.User import User
 from controllers import account, chamada
 
 
 app = Flask(__name__)
-app.secret_key = "s3cr3t"
+app.secret_key = config.SECRET_KEY
 login_manager = LoginManager(app)
 
 # routes projects
