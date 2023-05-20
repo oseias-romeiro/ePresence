@@ -6,8 +6,7 @@ import qrcode, io
 
 from db import Session
 from models.User import User
-from models.Turma import Turma, Turmas
-from models.Chamada import Chamada, Frequencia
+from models.Chamada import Chamada, Frequencia, Turma, Turmas
 from help.required import professor_required
 from forms.TurmaForm import TurmaForm, AddAluno
 from api.GeoDB import get_nearby_cities, get_distance
@@ -18,21 +17,14 @@ chamada_app = Blueprint("chamada_app", __name__)
 @chamada_app.route("/", methods=["GET"])
 @login_required
 def home():
-    sess = Session()
-
-    turmas_total = sess.query(Turmas).filter_by(id_user=current_user.id).all()
-    minhas_turmas = []
-    for t in turmas_total:
-        minhas_turmas.append(sess.query(Turma).filter_by(id=t.id_turma).first())
-    
-    sess.close()
+    with Session() as sess: minhas_turmas = sess.query(Turma).join(Turmas).filter_by(id_user=current_user.id).all()
 
     form_turma = TurmaForm()
 
     return render_template("home.html", current_user=current_user, turmas=minhas_turmas, form_turma=form_turma)
 
 
-@chamada_app.route("/add_turma", methods=["GET", "POST"])
+@chamada_app.route("/add_turma", methods=["POST"])
 @login_required
 def add_turma():
 
@@ -41,43 +33,30 @@ def add_turma():
         return redirect(url_for("chamada_app.home"))
 
     form = TurmaForm()
-    if request.method == "GET":
-        return render_template("chamada/add_turma.html", form=form)
-    
     if form.validate_on_submit():
         try:
             sess = Session()
 
-            turma_total = sess.query(Turma).all()
-            if (len(turma_total) > 0):
-                turma_id = max([t.id for t in turma_total])
-            else:
-                turma_id = 0
-
-            turma = Turma(
-                id = turma_id+1,
-                name=form.name.data
-            )
+            turma = Turma(name=form.name.data)
             sess.add(turma)
+            sess.commit()
 
             turmas = Turmas(
                 id_user = current_user.id,
-                id_turma = turma_id+1,
+                id_turma = turma.id
             )
             sess.add(turmas)
-
             sess.commit()
+
             sess.close()
 
             flash("Turma adicionada", "success")
-
-            return redirect(url_for("chamada_app.home"))
         except Exception as e:
             flash("Erro ao adicionar turma", "danger")
-            return redirect(url_for("chamada_app.add_turma"))
     else:
         flash("Token inválido", "danger")
-        return redirect(url_for("chamada_app.add_turma"))
+
+    return redirect(url_for("chamada_app.home"))
     
 
 @chamada_app.route("/del_turma", methods=["GET"])
@@ -88,22 +67,19 @@ def del_turma():
     if professor_required(current_user, id_turma):
         try:
             sess = Session()
-            turmas = sess.query(Turmas).filter_by(id_turma=id_turma).all()
+
+            turma = sess.query(Turma).filter_by(id=id_turma).first()
             
-            chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
-            
-            for c in chamadas:
-                freqs = sess.query(Frequencia).filter_by(id_chamada=c.id).all()
-                for f in freqs:
+            for c in turma.chamadas:
+                for f in c.frequencias:
                     sess.delete(f)
                 sess.delete(c)
 
-            for t in turmas:
+            for t in turma.turmas:
                 sess.delete(t)
             
-            turma = sess.query(Turma).filter_by(id=id_turma).first()
-            
             sess.delete(turma)
+            
             sess.commit()
             sess.close()
 
@@ -124,18 +100,12 @@ def list_alunos():
     
     if professor_required(current_user, id_turma):
         try: 
-            sess = Session()
+            with Session() as sess: alunos = sess.query(User).join(Turmas).filter_by(id_turma=id_turma).all()
             
-            turma_alunos = sess.query(Turmas).filter_by(id_turma=id_turma).all()
-            
-            alunos = []
-            for t in turma_alunos:
-                alunos.append(sess.query(User).filter_by(id=t.id_user).first())
-            
-            sess.close()
-            
-            return render_template("chamada/list_alunos.html", alunos=alunos, id_turma=id_turma)
-        except:
+            form_aluno = AddAluno()
+            return render_template("chamada/list_alunos.html", alunos=alunos, id_turma=id_turma, form_aluno=form_aluno)
+        
+        except Exception as e:
             flash("Erro ao listar usuarios", "danger")
     else:
         flash("Usuário precisa ser um professor matriculado na turma", "danger")
@@ -153,14 +123,11 @@ def del_aluno():
         try:
             sess = Session()
             
-            turma_alunos = sess.query(Turmas).filter_by(id_turma=id_turma).all()
-
-            for t in turma_alunos:
-                if t.id_user == int(id_aluno):
-                    sess.delete(t)
-                    sess.commit()
-                    break
+            turmas = sess.query(Turmas).filter_by(id_turma=id_turma, id_user=id_aluno).first()
             
+            sess.delete(turmas)
+            sess.commit()
+
             sess.close()
             
             flash("Aluno removido com sucesso", "success")
@@ -173,43 +140,35 @@ def del_aluno():
     return redirect(url_for("chamada_app.home"))
 
 
-@chamada_app.route("/add_aluno", methods=["GET", "POST"])
+@chamada_app.route("/add_aluno", methods=["POST"])
 @login_required
 def add_aluno():
-    form = AddAluno()
-    if request.method == "GET":
-        id_turma = request.args.get("id_turma")
-        return render_template("chamada/add_aluno.html", form=form, id_turma=id_turma)
-    
-    elif request.method == "POST":
-        
-        id_turma = request.form.get("id_turma")
-        mat = request.form.get("mat")
+    id_turma = request.form.get("id_turma")
+    mat = request.form.get("mat")
 
-        if professor_required(current_user, id_turma):
-            try:
-                sess = Session()
+    if professor_required(current_user, id_turma):
+        try:
+            sess = Session()
 
-                id_user = sess.query(User).filter_by(matricula=mat).first().id
+            id_user = sess.query(User).filter_by(matricula=mat).first().id
 
-                turmas = Turmas(
-                    id_user = id_user,
-                    id_turma = id_turma
-                )
-                sess.add(turmas)
+            turmas = Turmas(
+                id_user = id_user,
+                id_turma = id_turma
+            )
+            sess.add(turmas)
 
-                sess.commit()
-                sess.close()
+            sess.commit()
+            sess.close()
 
-                flash("Aluno adicionado", "success")
-                return redirect(url_for("chamada_app.home"))
-            except:
-                flash("Erro ao adicionar aluno", "danger")
-        else:
-            flash("Usuário precisa ser um professor matriculado na turma", "danger")
+            flash("Aluno adicionado", "success")
+            return redirect(url_for("chamada_app.home"))
+        except:
+            flash("Erro ao adicionar aluno", "danger")
+    else:
+        flash("Usuário precisa ser um professor matriculado na turma", "danger")
         
     return redirect(url_for("chamada_app.add_aluno"))
-
 
 
 @chamada_app.route("/frequencias", methods=["GET"])
@@ -224,14 +183,10 @@ def frequencias():
         chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
 
         for c in chamadas:
-            freqs = sess.query(Frequencia).filter_by(
-                id_user=current_user.id,
-                id_chamada=c.id
-            ).all()
-            freqs_chamada = [f.id_chamada for f in freqs]
+            freqs = [f.id_chamada for f in c.frequencias]
             chamadas_frequencias.append({
                 "date": c.date,
-                "presente": c.id in freqs_chamada,
+                "presente": c.id in freqs,
                 "id": c.id,
             })
         sess.close()
@@ -240,7 +195,6 @@ def frequencias():
         return redirect(url_for("chamada_app.home"))
         
     return render_template("chamada/frequencias.html", chamadas=chamadas_frequencias, id_turma=id_turma)
-
 
 
 @chamada_app.route("/add_chamada", methods=["GET"])
@@ -259,27 +213,19 @@ def add_chamada():
         try:
             sess = Session()
             dia = datetime.now()
-            ch = sess.query(Chamada).filter_by(date=dia.date(), id_turma=id_turma).all()
-            if len(ch) == 0:
-                chamada = Chamada(
-                    date = dia.date(),
-                    id_turma = id_turma,
-                    location = geoloc if geoloc else None
-                )
-                sess.add(chamada)
-                sess.commit()
+            chamada = Chamada(
+                date = dia.date(),
+                id_turma = id_turma,
+                location = geoloc if geoloc else None
+            )
+            sess.add(chamada)
+            sess.commit()
 
-                id_chamada = sess.query(Chamada).filter_by(date=dia.date()).first().id
-                
+            return render_template("chamada/qrcode.html", id_chamada=chamada.id)
+            
+        except Exception as e:
+            flash("Chamada já foi criada", "info")
 
-                return render_template("chamada/qrcode.html", id_chamada=id_chamada)
-            
-            else:
-                flash("Chamada já foi criada", "info")
-            
-        except:
-            flash("Houve um erro na consluta", "danger")
-    
     else:
         flash("Usuário precisa ser um professor matriculado na turma", "danger")
     
@@ -354,10 +300,9 @@ def lista():
     try:
         sess = Session()
         chamada = sess.query(Chamada).filter_by(id=id_chamada).first()
-        frequencias_list = sess.query(Frequencia).filter_by(id_chamada=id_chamada).all()
         
         alunos = []
-        for f in frequencias_list:
+        for f in chamada.frequencias:
             dist=None
             if f.location and chamada.location:
                 dist = get_distance(
@@ -368,13 +313,12 @@ def lista():
                 sess.query(User).filter_by(id=f.id_user).first(),
                 dist
             ))
-            print("@@@@@@", f.location, chamada.location, dist)
         sess.close()
     except:
         flash("Houve um erro ao coletar a lista de frequecia", "danger")
         return redirect(url_for("chamada_app.home"))
 
-    dia = datetime.strptime(dia, "%Y-%m-%d")
+    dia = datetime.strptime(dia.split(" ")[0], "%Y-%m-%d")
     return render_template("chamada/lista.html", alunos=alunos, dia=dia.strftime("%d/%m/%Y"), id_chamada=id_chamada)
 
 

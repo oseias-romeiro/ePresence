@@ -1,6 +1,6 @@
 from db import Session
 
-from models.Turma import Turmas
+from models.Chamada import Turmas
 
 # verificar se o usuario é professor e registrado na turma
 def professor_required(current_user, id_turma):
