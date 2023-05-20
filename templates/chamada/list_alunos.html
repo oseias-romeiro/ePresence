@@ -4,11 +4,12 @@
 {% block content %}
     <h2>
         {% block title %}Alunos{% endblock %}
+        <!-- Button trigger newAlunoModal -->
+        <button style="float: right;" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newAlunoModal">
+            Adicionar aluno
+        </button>
     </h2>
     <br>
-    <a href="/chamada/add_aluno?id_turma={{ id_turma }}" style="text-decoration: none;">
-        <button class="btn btn-light">Adicionar aluno</button>
-    </a>
     <table class="table">
         <tr>
             <th>Matricula</th>
@@ -27,6 +28,32 @@
         </tr>
         {% endfor %}
     </table>
+
+    <!-- Modal: add student -->
+    <div class="modal fade" id="newAlunoModal" tabindex="-1" role="dialog" aria-labelledby="newAlunoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="newAlunoModalLabel">Adicionar aluno</h5>
+            </div>
+            <form method="post" action="/chamada/add_aluno" autocomplete="off">
+                <div class="modal-body">
+                    {{ form_aluno.csrf_token }}
+
+                    {{ form_aluno.mat.label }}<br>
+                    {{ form_aluno.mat(class_="form-control", type_="number") }}<br>
+
+                    <input hidden type="text" name="id_turma" value="{{ id_turma }}">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
 
 {% endblock %}
 
