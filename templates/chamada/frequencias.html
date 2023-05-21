@@ -6,7 +6,7 @@
         {% block title %}Frequencias{% endblock %}
         
         {% if current_user.professor %}
-            <a href="/chamada/add_chamada?id_turma={{ id_turma }}"><button style="float: right;" class="btn btn-primary">
+            <a href="/chamada/add_chamada/{{ id_turma }}"><button style="float: right;" class="btn btn-primary">
                 Adicionar chamada
             </button></a>
         {% endif %}
