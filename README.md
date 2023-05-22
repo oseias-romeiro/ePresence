@@ -26,18 +26,6 @@ Para o projeto foi utilizado:
   - **GeoDB**
   - **GIT**
 
-### Dados
-
-O projeto está utilizando sqlite, com os seguintes dados de exemplos:
-
-|Matricula|Professor|
-|--- |--- |
-|100000000|Sim|
-|200000000|Sim|
-|111111111|Não|
-|222222222|Não|
-
-> Todas as senhas são `1234`
 
 ### APIs
 
