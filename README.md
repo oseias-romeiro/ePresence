@@ -38,7 +38,7 @@ Foi utilizado a api GeoDB para obter informações de coordenadas coletadas pela
 Variaveis de ambiente são configurados em [config.py](./config.py)
 
 - **RAPID_KEY** : deve manter a chave rapid para a utilização da api
-- **ENV** : Configura de acordo com um ambiente (Produção, Desenvolvimento, Teste [PRD|DSV|TST])
+- **ENV** : Configura de acordo com um ambiente (Produção, Desenvolvimento (default), Teste [PRD|DSV|TST])
 
 ## Telas
 

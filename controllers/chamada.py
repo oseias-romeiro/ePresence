@@ -228,44 +228,49 @@ def gen_qrcode():
 
     return Response(img_buffer, mimetype="image/png")
 
-@chamada_app.route("/add_frequencia", methods=["GET", "POST"])
+@chamada_app.route("/add_frequencia", methods=["GET"])
 @login_required
 def add_frequencia():
     expiration = request.args.get("expiration")
     id_chamada = request.args.get("id_chamada")
 
-    if request.method == "GET":
-        return render_template("chamada/confirm_frequencia.html", expiration=expiration, id_chamada=id_chamada)
+    return render_template("chamada/confirm_frequencia.html", expiration=expiration, id_chamada=id_chamada)
     
-    elif request.method == "POST":
-        lat = request.form.get("lat")
-        lon = request.form.get("lon")
 
-        geoloc=None
-        if lat and lon:
-            geoloc = get_nearby_cities(lat,lon)
+@chamada_app.route("/add_frequencia", methods=["POST"])
+@login_required
+def add_frequencia_create():
+    expiration = request.args.get("expiration")
+    id_chamada = request.args.get("id_chamada")
+    
+    lat = request.form.get("lat")
+    lon = request.form.get("lon")
 
-        if expiration is not None:
-            expiration = datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
-            if datetime.now() > expiration:
-                flash("Código expirado", "danger")
-                return redirect(url_for("chamada_app.home"))
+    geoloc=None
+    if lat and lon:
+        geoloc = get_nearby_cities(lat,lon)
 
-        freq = Frequencia(
-            id_user = current_user.id,
-            id_chamada = id_chamada,
-            location = geoloc if geoloc else None
-        )
-        try:
-            with Session() as sess:
-                sess.add(freq)
-                sess.commit()
-                
-            flash("Frequencia registrada", "success")
-        except:
-            flash("Houve um erro registrar frequencia", "danger")
-        
-        return redirect(url_for("chamada_app.home"))
+    if expiration is not None:
+        expiration = datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
+        if datetime.now() > expiration:
+            flash("Código expirado", "danger")
+            return redirect(url_for("chamada_app.home"))
+
+    freq = Frequencia(
+        id_user = current_user.id,
+        id_chamada = id_chamada,
+        location = geoloc if geoloc else None
+    )
+    try:
+        with Session() as sess:
+            sess.add(freq)
+            sess.commit()
+            
+        flash("Frequencia registrada", "success")
+    except:
+        flash("Houve um erro registrar frequencia", "danger")
+    
+    return redirect(url_for("chamada_app.home"))
 
 
 @chamada_app.route("/lista", methods=["GET"])

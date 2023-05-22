@@ -10,11 +10,16 @@ from forms.LoginForm import SignInForm, SignUpForm
 account_app = Blueprint("account_app", __name__)
 
 
-@account_app.route("/sign_in", methods=["GET", "POST"])
+@account_app.route("/sign_in", methods=["GET"])
 def sign_in():
     form = SignInForm()
     if request.method == "GET":
         return render_template("account/sign_in.html", form=form)
+
+
+@account_app.route("/sign_in", methods=["POST"])
+def sign_in_create():
+    form = SignInForm()
 
     if form.validate_on_submit():
         sess = Session()
@@ -34,11 +39,14 @@ def sign_in():
         return redirect(url_for("account_app.sign_in"))
 
 
-@account_app.route("/sign_up", methods=["GET", "POST"])
+@account_app.route("/sign_up", methods=["GET"])
 def sign_up():
+    return render_template("account/sign_up.html", form=SignUpForm())
+
+
+@account_app.route("/sign_up", methods=["POST"])
+def sign_up_create():
     form = SignUpForm()
-    if request.method == "GET":
-        return render_template("account/sign_up.html", form=form)
 
     if form.validate_on_submit():
         try:
@@ -68,7 +76,7 @@ def sign_up():
         return redirect(url_for("account_app.sign_in"))
 
 
-@account_app.route("/profile", methods=["GET", "POST"])
+@account_app.route("/profile", methods=["GET"])
 @login_required
 def profile():
     form = SignUpForm()
@@ -78,6 +86,12 @@ def profile():
         form.professor.data = current_user.professor
 
         return render_template("account/profile.html", form=form)
+
+
+@account_app.route("/profile", methods=["POST"])
+@login_required
+def profile_edit():
+    form = SignUpForm()
 
     if form.validate_on_submit():
         try:
@@ -111,6 +125,7 @@ def profile():
     else:
         flash("Token inválido", "danger")
         return redirect(url_for("account_app.profile"))
+    
 
 @account_app.route("/logout", methods=["GET"])
 @login_required
