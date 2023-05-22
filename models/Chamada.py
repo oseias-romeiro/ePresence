@@ -10,9 +10,11 @@ class Chamada(db.Model):
     __tablename__ = "chamadas"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    date: Mapped[datetime] = mapped_column(nullable=False, unique=True)
+    date: Mapped[datetime] = mapped_column(nullable=False)
     id_turma: Mapped[int] = mapped_column(ForeignKey("turma.id"))
     location: Mapped[dict] = mapped_column(JSON, nullable=True)
+
+    __table_args__ = (UniqueConstraint(date, id_turma, name="constDateTurma"),)
 
     turma: Mapped["Turma"] = relationship(foreign_keys="Chamada.id_turma")
 

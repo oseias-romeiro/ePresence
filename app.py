@@ -46,8 +46,5 @@ if __name__ == "__main__":
     db.metadata.create_all(engine)
 
     # run flask app
-    app.run(
-        host="0.0.0.0",
-        port=5000
-    )
+    app.run(config.HOST, config.PORT)
 

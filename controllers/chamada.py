@@ -135,7 +135,7 @@ def add_aluno(id_turma):
         sess = Session()
 
         id_user = sess.query(User).filter_by(matricula=mat).first().id
-
+        print(mat, id_user)
         turmas = Turmas(
             id_user = id_user,
             id_turma = id_turma
