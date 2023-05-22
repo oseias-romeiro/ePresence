@@ -7,16 +7,24 @@ Projeto de Engenharia de Software: Proposta de solução para uma versão eletr�
 
 ## Descrição
 
-Neste projeto foi criado 5 entidades (user, turma, turmas, chamada, frequencias), nos quais ligam entre si e permite ao usuário-professor criar turmas, adicionar outros usuários-alunos e criar chamada para o dia. O usuário-aluno, pode responder a frequencia, se o professor já ter criado a chamada para o dia, utilizando o qrcode disponível para o professor.
+Neste projeto foi criado 5 entidades (user, turma, turmas, chamada, frequencias), nos quais se ligam entre si e permite ao usuário-professor criar turmas, adicionar usuários-alunos e criar chamada para o dia. O usuário-aluno, caso esteja na turma, pode responder a frequencia, se o professor já ter criado a chamada no dia, utilizando o qrcode fornecido para o professor. Assim que a chamada é respondida, o professor pode ver uma lista de usuários presentes e reijar um ponto de presença de um aluno e o aluno pode ver se em determinado dia estava presente ou não.
+
+Neste projeto, foi desenvolvida uma aplicação de chamada de presença online, composta por cinco entidades: `user`, `turma`, `turmas`, `chamada` e `frequencias`.
+
+A aplicação permite que professores criem turmas, adicionem alunos a essas turmas e realizem chamadas diárias. Os alunos, se estiverem matriculados em uma turma, podem responder às chamadas utilizando o QR Code fornecido pelo professor. Uma vez que a chamada é respondida, o professor pode visualizar uma lista dos alunos presentes e registrar a presença de um aluno. Os alunos, por sua vez, podem consultar se estiveram presentes ou ausentes em um determinado dia.
+
+Essa aplicação proporciona uma maneira conveniente e eficiente de gerenciar a presença dos alunos em aulas ou atividades acadêmicas por meio de um sistema online. Ela simplifica o processo de chamada, permitindo aos professores obter rapidamente informações atualizadas sobre a presença dos alunos, além de oferecer aos alunos a facilidade de responder às chamadas por meio do uso de QR Codes.
+
 
 ## Ferramentas
 
 Para o projeto foi utilizado:
   - **Flask**
   - **sqlite3**
-  - **SQLAlchemy**
+  - **SQLAlchemy2**
   - **Werkzeug**
   - **GeoDB**
+  - **GIT**
 
 ### Dados
 
@@ -39,20 +47,14 @@ Foi utilizado a api GeoDB para obter informações de coordenadas coletadas pela
 
 ### Env
 
-Variaveis de ambiente são declarados em `.env`
+Variaveis de ambiente são configurados em [config.py](./config.py)
 
 - **RAPID_KEY** : deve manter a chave rapid para a utilização da api
+- **ENV** : Configura de acordo com um ambiente (Produção, Desenvolvimento, Teste [PRD|DSV|TST])
 
-## Algumas telas
+## Telas
 
-- Tela de Login
-
-<img src="static/media/login.png" height="400px">
-
-- Painel do professor
-
-<img src="static/media/home.png" height="400px">
-<br><br>
+<img src="static/media/tutorial.gif">
 
 ## Execução 
 
