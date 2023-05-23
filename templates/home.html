@@ -28,13 +28,13 @@
                         ...
                         </button>
                         <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/chamada/list_alunos/{{ t.id }}">Alunos</a></li>
-                        <li><a class="dropdown-item" href="/chamada/del_turma/{{ t.id }}">Remover</a></li>
-                        <li><a class="dropdown-item" href="/chamada/frequencias?id_turma={{ t.id }}">Frequencia</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('chamada_app.turma_alunos', id_turma=t.id) }}">Alunos</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('chamada_app.turma_delete', id_turma=t.id) }}">Remover</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('chamada_app.turma_frequencias', id_turma=t.id) }}">Chamada</a></li>
                         </ul>
                     </div>
                     {% else %}
-                    <a href="/chamada/frequencias?id_turma={{ t.id }}">Frequencia</a>
+                    <a href="{{ url_for('chamada_app.turma_frequencias', id_turma=t.id) }}">Chamada</a>
                     {% endif %}
                 </div>
             </li>
@@ -52,7 +52,7 @@
             <div class="modal-header">
             <h5 class="modal-title" id="newTurmaModalLabel">Nova turma</h5>
             </div>
-            <form method="post" action="/chamada/add_turma" autocomplete="off">
+            <form method="post" action="{{ url_for('chamada_app.turma_new') }}" autocomplete="off">
                 <div class="modal-body">
                     {{ form_turma.csrf_token }}
         

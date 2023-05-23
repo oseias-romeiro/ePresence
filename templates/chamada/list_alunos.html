@@ -22,7 +22,7 @@
             <td>{{ a.matricula }}</td>
             <td>{{ a.name }}</td>
             <td>
-                <a href="/chamada/del_aluno/{{ id_turma }}?id_aluno={{ a.id }}">Remover</a>
+                <a href="{{ url_for('chamada_app.aluno_delete', id_turma=id_turma, id_aluno=a.id ) }}">Remover</a>
             </td>
             {% endif %}
         </tr>
@@ -36,7 +36,7 @@
             <div class="modal-header">
             <h5 class="modal-title" id="newAlunoModalLabel">Adicionar aluno</h5>
             </div>
-            <form method="post" action="/chamada/add_aluno/{{ id_turma }}" autocomplete="off">
+            <form method="post" action="{{ url_for('chamada_app.aluno_join', id_turma=id_turma ) }}" autocomplete="off">
                 <div class="modal-body">
                     {{ form_aluno.csrf_token }}
 

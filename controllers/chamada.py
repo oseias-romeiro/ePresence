@@ -24,10 +24,10 @@ def home():
     return render_template("home.html", current_user=current_user, turmas=minhas_turmas, form_turma=form_turma)
 
 
-@chamada_app.route("/add_turma", methods=["POST"])
+@chamada_app.route("/turmas/new", methods=["POST"])
 @login_required
 @prof_required
-def add_turma():
+def turma_new():
 
     form = TurmaForm()
     if form.validate_on_submit():
@@ -56,10 +56,10 @@ def add_turma():
     return redirect(url_for("chamada_app.home"))
     
 
-@chamada_app.route("/del_turma/<int:id_turma>", methods=["GET"])
+@chamada_app.route("/turmas/<int:id_turma>/delete", methods=["GET"])
 @login_required
 @prof_required
-def del_turma(id_turma):
+def turma_delete(id_turma):
     try:
         sess = Session()
 
@@ -86,10 +86,10 @@ def del_turma(id_turma):
     return redirect(url_for("chamada_app.home"))
 
 
-@chamada_app.route("/list_alunos/<int:id_turma>", methods=["GET"])
+@chamada_app.route("/turmas/<int:id_turma>/alunos", methods=["GET"])
 @login_required
 @prof_required
-def list_alunos(id_turma):
+def turma_alunos(id_turma):
     try: 
         with Session() as sess: alunos = sess.query(User).join(Turmas).filter_by(id_turma=id_turma).all()
         
@@ -102,12 +102,10 @@ def list_alunos(id_turma):
     return redirect(url_for("chamada_app.home"))
 
 
-@chamada_app.route("/del_aluno/<int:id_turma>", methods=["GET"])
+@chamada_app.route("/turmas/<int:id_turma>/alunos/<int:id_aluno>/delete", methods=["GET"])
 @login_required
 @prof_required
-def del_aluno(id_turma):
-    id_aluno = request.args.get("id_aluno")
-    
+def aluno_delete(id_turma, id_aluno):
     try:
         sess = Session()
         
@@ -126,12 +124,12 @@ def del_aluno(id_turma):
     return redirect(url_for("chamada_app.home"))
 
 
-@chamada_app.route("/add_aluno/<int:id_turma>", methods=["POST"])
+@chamada_app.route("/turmas/<int:id_turma>/alunos/join", methods=["POST"])
 @login_required
 @prof_required
-def add_aluno(id_turma):
-    mat = request.form.get("mat")
+def aluno_join(id_turma):
     try:
+        mat = request.form.get("mat")
         sess = Session()
 
         id_user = sess.query(User).filter_by(matricula=mat).first().id
@@ -153,38 +151,12 @@ def add_aluno(id_turma):
     return redirect(url_for("chamada_app.add_aluno"))
 
 
-@chamada_app.route("/frequencias", methods=["GET"])
-@login_required
-def frequencias():
-    id_turma = request.args.get("id_turma")
-    chamadas_frequencias = []
-    
-    try:
-        sess = Session()
-
-        chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
-
-        for c in chamadas:
-            freqs = [f.id_chamada for f in c.frequencias]
-            chamadas_frequencias.append({
-                "date": c.date,
-                "presente": c.id in freqs,
-                "id": c.id,
-            })
-        sess.close()
-    except:
-        flash("Erro ao coletar frequencias", "danger")
-        return redirect(url_for("chamada_app.home"))
-        
-    return render_template("chamada/frequencias.html", chamadas=chamadas_frequencias, id_turma=id_turma)
-
-
-@chamada_app.route("/add_chamada/<int:id_turma>", methods=["GET"])
+@chamada_app.route("/turmas/<int:id_turma>/chamada/new", methods=["POST"])
 @login_required
 @prof_required
-def add_chamada(id_turma):
-    lat = request.args.get("lat")
-    lon = request.args.get("lon")
+def chamada_new(id_turma):
+    lat = request.form.get("lat")
+    lon = request.form.get("lon")
 
     geoloc=None
     if lat and lon:
@@ -209,12 +181,12 @@ def add_chamada(id_turma):
     return redirect(url_for("chamada_app.home"))
         
 
-@chamada_app.route("/gen_qrcode", methods=["GET"])
+@chamada_app.route("/frequencias/<int:id_chamada>/qrcode", methods=["GET"])
 @login_required
-def gen_qrcode():
-    id_chamada = request.args.get("id_chamada")
+def gen_qrcode(id_chamada):
+
     expiration = datetime.now() + timedelta(minutes=10)
-    temp_url = url_for("chamada_app.add_frequencia", expiration=expiration, id_chamada=id_chamada, _external=True)
+    temp_url = url_for("chamada_app.frequencia_confirm", expiration=expiration, id_chamada=id_chamada, _external=True)
     print("# url temporária:", temp_url)
 
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
@@ -228,20 +200,44 @@ def gen_qrcode():
 
     return Response(img_buffer, mimetype="image/png")
 
-@chamada_app.route("/add_frequencia", methods=["GET"])
+
+@chamada_app.route("/turmas/<int:id_turma>/frequencias/show", methods=["GET"])
 @login_required
-def add_frequencia():
+def turma_frequencias(id_turma):
+    chamadas_frequencias = []
+    
+    try:
+        sess = Session()
+
+        chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
+
+        for c in chamadas:
+            freqs = [f.id_chamada for f in c.frequencias]
+            chamadas_frequencias.append({
+                "date": c.date,
+                "presente": c.id in freqs,
+                "id": c.id,
+            })
+        sess.close()
+    except:
+        flash("Erro ao coletar frequencias", "danger")
+        return redirect(url_for("chamada_app.home"))
+        
+    return render_template("chamada/frequencias.html", chamadas=chamadas_frequencias, id_turma=id_turma)
+
+
+@chamada_app.route("/frequencias/<int:id_chamada>/confirm", methods=["GET"])
+@login_required
+def frequencia_confirm(id_chamada):
     expiration = request.args.get("expiration")
-    id_chamada = request.args.get("id_chamada")
 
     return render_template("chamada/confirm_frequencia.html", expiration=expiration, id_chamada=id_chamada)
     
 
-@chamada_app.route("/add_frequencia", methods=["POST"])
+@chamada_app.route("/frequencias/<int:id_chamada>/new", methods=["POST"])
 @login_required
-def add_frequencia_create():
+def frequencia_new(id_chamada):
     expiration = request.args.get("expiration")
-    id_chamada = request.args.get("id_chamada")
     
     lat = request.form.get("lat")
     lon = request.form.get("lon")
@@ -273,11 +269,10 @@ def add_frequencia_create():
     return redirect(url_for("chamada_app.home"))
 
 
-@chamada_app.route("/lista", methods=["GET"])
+@chamada_app.route("/frequencias/<int:id_chamada>/lista", methods=["GET"])
 @login_required
-def lista():
+def frequencia_lista(id_chamada):
     dia = request.args.get("dia")
-    id_chamada = request.args.get("id_chamada")
 
     try:
         sess = Session()
@@ -304,12 +299,9 @@ def lista():
     return render_template("chamada/lista.html", alunos=alunos, dia=dia.strftime("%d/%m/%Y"), id_chamada=id_chamada)
 
 
-@chamada_app.route("/rejeitar_freq", methods=["GET"])
+@chamada_app.route("/frequencias/<int:id_chamada>/aluno/<int:id_user>/rejeitar", methods=["GET"])
 @login_required
-def rejeitar_freq():
-    id_user = request.args.get("id_user")
-    id_chamada = request.args.get("id_chamada")
-
+def frequencias_rejeitar(id_chamada, id_user):
     try:
         sess = Session()
         frequencias_list = sess.query(Frequencia).filter_by(id_user=id_user, id_chamada=id_chamada).all()

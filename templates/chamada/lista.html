@@ -18,7 +18,7 @@
                 <td>{{ a[0].name }}</td>
                 <td>{{ a[1] if a[1]!=None else '' }}</td>
                 <td>
-                    <a href="/chamada/rejeitar_freq?id_user={{ a[0].id }}&id_chamada={{ id_chamada }}">Rejeitar</a>
+                    <a href="{{ url_for('chamada_app.frequencias_rejeitar', id_chamada=id_chamada, id_user=a[0].id) }}">Rejeitar</a>
                 </td>
             </tr>
         {% endfor %}

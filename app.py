@@ -13,7 +13,7 @@ login_manager = LoginManager(app)
 
 # routes projects
 app.register_blueprint(account.account_app, url_prefix="/account")
-app.register_blueprint(chamada.chamada_app, url_prefix="/chamada")
+app.register_blueprint(chamada.chamada_app, url_prefix="/")
 
 @login_manager.user_loader
 def load_user(user):
@@ -23,11 +23,6 @@ def load_user(user):
     ).first()
     sess.close()
     return res
-
-
-@app.route("/", methods=["GET"])
-def index():
-    return redirect(url_for("chamada_app.home"))
 
 
 @app.errorhandler(401)

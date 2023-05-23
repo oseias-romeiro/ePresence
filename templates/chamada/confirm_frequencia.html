@@ -8,34 +8,14 @@
     <br>
     
     <div class="d-flex justify-content-center">
-        <form action="/chamada/add_frequencia?expiration={{ expiration }}&id_chamada={{ id_chamada }}" method="post">
+        <form action="{{ url_for('chamada_app.frequencia_new', id_chamada=id_chamada, expiration=expiration)}}" method="post">
             <input hidden id="lat" type="text" name="lat" value="">
             <input hidden id="lon" type="text" name="lon" value="">
             <button class="btn btn-primary" type="submit">Confirmar</button>
         </form>
     </div>
 
-    <script>
-        const lat = document.getElementById("lat")
-        const lon = document.getElementById("lon")
-
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                (position)=>{
-                    lat.value = position.coords.latitude;
-                    lon.value = position.coords.longitude;
-
-                    console.log(lat, lon);
-                },
-                (err) => {
-                    console.log(err.message);
-                    alert("Erro ao obter localização!");
-                }
-            );
-        } else {
-            alert("Navegador não suporta geolocalização!");
-        }
-    </script>
+    <script src="/static/js/getLocation.js"></script>
 
 {% endblock %}
 

@@ -6,9 +6,14 @@
         {% block title %}Frequencias{% endblock %}
         
         {% if current_user.professor %}
-            <a href="/chamada/add_chamada/{{ id_turma }}"><button style="float: right;" class="btn btn-primary">
-                Adicionar chamada
-            </button></a>
+            <form action="{{ url_for('chamada_app.chamada_new', id_turma=id_turma)}}" method="post">
+                <input hidden id="lat" type="text" name="lat" value="">
+                <input hidden id="lon" type="text" name="lon" value="">
+                
+                <button style="float: right;" class="btn btn-primary" type="submit">
+                    Adicionar chamada
+                </button>
+            </form>
         {% endif %}
     </h2>
     <br>
@@ -26,7 +31,7 @@
             <td>{{ c["date"] }}</td>
             {% if current_user.professor %}
             <td>
-                <a href="/chamada/lista?dia={{ c['date'] }}&id_chamada={{ c['id'] }}" style="text-decoration: none;">
+                <a href="{{ url_for('chamada_app.frequencia_lista', id_chamada=c['id'], dia= c['date']) }}" style="text-decoration: none;">
                     lista
                 </a>
             </td>
