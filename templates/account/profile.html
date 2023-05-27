@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>{% block title %}Editando{% endblock %} perfil</h2>
     
     <div class="d-flex justify-content-center">
-        <form method="post" autocomplete="off" style="max-width: 350px;">
+        <form method="post" autocomplete="off" style="max-width: 500px;">
+            <h2>{% block title %}Editando{% endblock %} perfil</h2>
+            <br>
             {{ form.csrf_token }}
 
             {{ form.matricula.label }}<br>
@@ -23,10 +24,13 @@
             {{ form.professor }}<br>
 
             <br>
-            <button class="btn btn-success" type="submit">Editar</button>
-            <a href="/account/home">
-                <button class="btn btn-warning" type="button" class="btn-cancel">Cancelar</button>
-            </a>
+            <div style="text-align: center;">
+                <button class="btn btn-primary" type="submit">Editar</button>
+                <a href="/">
+                    <button class="btn btn-secondary" type="button" class="btn-cancel">Cancelar</button>
+                </a>
+                <br>
+            </div>
         </form>
     </div>
     
