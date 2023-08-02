@@ -14,14 +14,14 @@ from api.GeoDB import get_nearby_cities, get_distance
 chamada_app = Blueprint("chamada_app", __name__)
 
 
-@chamada_app.route("/", methods=["GET"])
+@chamada_app.route("/home", methods=["GET"])
 @login_required
 def home():
     with Session() as sess: minhas_turmas = sess.query(Turma).join(Turmas).filter_by(id_user=current_user.id).all()
 
     form_turma = TurmaForm()
 
-    return render_template("home.html", current_user=current_user, turmas=minhas_turmas, form_turma=form_turma)
+    return render_template("home.jinja2", current_user=current_user, turmas=minhas_turmas, form_turma=form_turma)
 
 
 @chamada_app.route("/turmas/new", methods=["POST"])
@@ -94,7 +94,7 @@ def turma_alunos(id_turma):
         with Session() as sess: alunos = sess.query(User).join(Turmas).filter_by(id_turma=id_turma).all()
         
         form_aluno = AddAluno()
-        return render_template("chamada/list_alunos.html", alunos=alunos, id_turma=id_turma, form_aluno=form_aluno)
+        return render_template("chamada/list_alunos.jinja2", alunos=alunos, id_turma=id_turma, form_aluno=form_aluno)
     
     except Exception as e:
         flash("Erro ao listar usuarios", "danger")
@@ -173,7 +173,7 @@ def chamada_new(id_turma):
         sess.add(chamada)
         sess.commit()
 
-        return render_template("chamada/qrcode.html", id_chamada=chamada.id)
+        return render_template("chamada/qrcode.jinja2", id_chamada=chamada.id)
         
     except Exception as e:
         flash("Chamada já foi criada", "info")
@@ -223,7 +223,7 @@ def turma_frequencias(id_turma):
         flash("Erro ao coletar frequencias", "danger")
         return redirect(url_for("chamada_app.home"))
         
-    return render_template("chamada/frequencias.html", chamadas=chamadas_frequencias, id_turma=id_turma)
+    return render_template("chamada/frequencias.jinja2", chamadas=chamadas_frequencias, id_turma=id_turma)
 
 
 @chamada_app.route("/frequencias/<int:id_chamada>/confirm", methods=["GET"])
@@ -231,7 +231,7 @@ def turma_frequencias(id_turma):
 def frequencia_confirm(id_chamada):
     expiration = request.args.get("expiration")
 
-    return render_template("chamada/confirm_frequencia.html", expiration=expiration, id_chamada=id_chamada)
+    return render_template("chamada/confirm_frequencia.jinja2", expiration=expiration, id_chamada=id_chamada)
     
 
 @chamada_app.route("/frequencias/<int:id_chamada>/new", methods=["POST"])
@@ -296,7 +296,7 @@ def frequencia_lista(id_chamada):
         return redirect(url_for("chamada_app.home"))
 
     dia = datetime.strptime(dia.split(" ")[0], "%Y-%m-%d")
-    return render_template("chamada/lista.html", alunos=alunos, dia=dia.strftime("%d/%m/%Y"), id_chamada=id_chamada)
+    return render_template("chamada/lista.jinja2", alunos=alunos, dia=dia.strftime("%d/%m/%Y"), id_chamada=id_chamada)
 
 
 @chamada_app.route("/frequencias/<int:id_chamada>/aluno/<int:id_user>/rejeitar", methods=["GET"])

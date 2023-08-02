@@ -1,41 +1,44 @@
-from os import getenv
-import pathlib
-from uuid import uuid4
+import os
+from dotenv import load_dotenv
 
-class Base:
-    # all consts used
-    PATH = pathlib.Path(__file__).parent.resolve()
-    ENV = getenv("ENV")
-    RAPID_KEY = getenv("RAPID_KEY")
-    DB_URI = None
-    SECRET_KEY = "s3cr3t"
-    HOST = "127.0.0.1"
-    PORT = 5000
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv()
 
-class Config(Base):
+class Config(object):
+    TESTING = False
+    SECRET_KEY = os.getenv("SECRET_KEY",) # In production, should be set to a random string
+    SQLALCHEMY_ECHO = os.environ.get("SQLALCHEMY_ECHO", False) # Print in console all SQL commands
 
-    def __init__(self):
-        if self.ENV == "PRD": self.production()
-        elif self.ENV == "DEV": self.development()
-        elif self.ENV == "TST": self.test()
-        else: self.development()
+class ProductionConfig(Config):
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")# mysql://user@localhost/foo
 
-    def production(self):
-        print("# Production environment")
-        self.DB_URI = f"sqlite:///{self.PATH}/db.sqlite"
-        self.SECRET_KEY = str(uuid4())
-        self.HOST = "0.0.0.0"
-        self.PORT = 80
-        print("SECRET_KEY:", self.SECRET_KEY)
+class DevelopmentConfig(Config):
+    SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(basedir, 'db.sqlite')}"
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+class TestingConfig(Config):
+    DATABASE_URI = 'sqlite:///:memory:'
+    TESTING = True
 
 
-    def development(self):
-        print("# Development environment")
-        self.DB_URI = f"sqlite:///{self.PATH}/db.sqlite"
+config_map = {
+    "development":  DevelopmentConfig,
+    "production": ProductionConfig,
+    "testing": TestingConfig,
+}
 
-    def test(self):
-        print("# Test environment")
-        self.DB_URI = f"sqlite:///:memory:?cache=shared"
+def get_env():
+    if os.getenv("APP_ENV") == "production":
+        return "production"
+    elif os.getenv("APP_ENV") == "testing":
+        return "testing"
+    else:
+        return "development"
 
-
-config = Config()
+def get_config() -> Config:
+    print("!!! init config !!!")
+    env = get_env()
+    print(f"!!! env: {env} !!!")
+    return config_map[env]
+    # get config environment from environment variable, default to development
+   

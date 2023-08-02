@@ -1,8 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, flash, url_for
-from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 
-from db import Session
+from app import db, bcrypt
 from models.User import User
 from help.validators import valid_pw
 from forms.LoginForm import SignInForm, SignUpForm
@@ -14,7 +13,7 @@ account_app = Blueprint("account_app", __name__)
 def sign_in():
     form = SignInForm()
     if request.method == "GET":
-        return render_template("account/sign_in.html", form=form)
+        return render_template("account/sign_in.jinja2", form=form)
 
 
 @account_app.route("/sign_in", methods=["POST"])
@@ -28,7 +27,7 @@ def sign_in_create():
         ).first()
         sess.close()
 
-        if user and check_password_hash(user.password, form.password.data):
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
             return redirect(url_for("chamada_app.home"))
         else:
@@ -41,7 +40,7 @@ def sign_in_create():
 
 @account_app.route("/sign_up", methods=["GET"])
 def sign_up():
-    return render_template("account/sign_up.html", form=SignUpForm())
+    return render_template("account/sign_up.jinja2", form=SignUpForm())
 
 
 @account_app.route("/sign_up", methods=["POST"])
@@ -56,7 +55,7 @@ def sign_up_create():
             user = User(
                 matricula=form.matricula.data,
                 name=form.name.data,
-                password=generate_password_hash(form.password1.data),
+                password=bcrypt.generate_password_hash(form.password1.data),
                 professor=form.professor.data
             )
             sess = Session()
@@ -85,7 +84,7 @@ def profile():
         form.name.data = current_user.name
         form.professor.data = current_user.professor
 
-        return render_template("account/profile.html", form=form)
+        return render_template("account/profile.jinja2", form=form)
 
 
 @account_app.route("/profile", methods=["POST"])
@@ -108,7 +107,7 @@ def profile_edit():
                 id=current_user.id,
                 matricula=form.matricula.data,
                 name=form.name.data,
-                password=generate_password_hash(form.password1.data),
+                password=bcrypt.generate_password_hash(form.password1.data),
                 professor=form.professor.data
             )
             sess.add(user)

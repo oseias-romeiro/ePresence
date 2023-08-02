@@ -1,0 +1,27 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+
+<div class="card d-flex justify-content-center align-items-center" style="height: 100vh; background-color: rgba(0, 0, 0, 0.366); padding: 20px;">
+    <div class="text-center text-white">
+        <h1>ePresence</h1>
+        <br>
+        <img class="img-fluid rounded float-left" src="static/media/digital_education.jpg">
+        <br><br>
+        <h5 class="d-flex justify-content-center">Welcome to the future of virtual education with ePresence, the cutting-edge web roll call system designed to streamline attendance tracking in online classes! As the world of education rapidly evolves, we understand the importance of fostering engagement and accountability in virtual learning environments. That's why we've created ePresence - a user-friendly and efficient solution to mark attendance in online classes effortlessly.</h5>
+        <br>
+        <a style="min-width: 140px;" class="btn btn-light" href="/account/sign_in">Login</a>
+        <a class="btn btn-light" href="/account/sign_in">Create Account</a>
+    </div>
+</div>
+<hr>
+
+<style>
+    body{
+        background-image: url("static/media/greenboard.jpg");
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+</style>
+
+{% endblock %}

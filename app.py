@@ -1,29 +1,44 @@
-from flask import Flask, redirect, url_for, flash
+from flask import Flask, redirect, url_for, flash, render_template
 from flask_login import LoginManager
+from flask_bootstrap import Bootstrap5
+from flask_bcrypt import Bcrypt
+from flask_wtf.csrf import CSRFProtect
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
-from config import config
-from db import engine, Session, db
-from models.User import User
-from controllers import account, chamada
+
+from config import get_config
 
 
 app = Flask(__name__)
-app.secret_key = config.SECRET_KEY
-login_manager = LoginManager(app)
 
-# routes projects
+# configs
+config = get_config()
+app.config.from_object(config)
+
+# extensions
+login_manager = LoginManager(app)
+bootstrap = Bootstrap5(app)
+bcrypt = Bcrypt(app)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+csrf = CSRFProtect(app)
+
+# lazy imports
+from auth.loaders import load_user
+from cli_cmds import seed_cli
+from controllers import account, chamada
+
+# blueprints
 app.register_blueprint(account.account_app, url_prefix="/account")
 app.register_blueprint(chamada.chamada_app, url_prefix="/")
 
-@login_manager.user_loader
-def load_user(user):
-    sess = Session()
-    res = sess.query(User).filter_by(
-        id=user
-    ).first()
-    sess.close()
-    return res
+# cli
+app.cli.add_command(seed_cli)
 
+@app.route("/", methods=["GET"])
+def index():
+    return render_template("index.jinja2")
 
 @app.errorhandler(401)
 def custom_401(error):
@@ -34,12 +49,4 @@ def custom_401(error):
 @app.errorhandler(404)
 def custom_404(error):
     return redirect(url_for("index"))
-
-
-if __name__ == "__main__":
-    # creating tables
-    db.metadata.create_all(engine)
-
-    # run flask app
-    app.run(config.HOST, config.PORT)
 
