@@ -21,11 +21,9 @@ def sign_in_create():
     form = SignInForm()
 
     if form.validate_on_submit():
-        sess = Session()
-        user = sess.query(User).filter_by(
-            matricula=form.matricula.data
+        user = db.session.query(User).filter_by(
+            registration=form.matricula.data
         ).first()
-        sess.close()
 
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
@@ -53,15 +51,13 @@ def sign_up_create():
                 raise Exception
 
             user = User(
-                matricula=form.matricula.data,
+                registration=form.matricula.data,
                 name=form.name.data,
                 password=bcrypt.generate_password_hash(form.password1.data),
-                professor=form.professor.data
+                role=form.professor.data
             )
-            sess = Session()
-            sess.add(user)
-            sess.commit()
-            sess.close()
+            db.session.add(user)
+            db.session.commit()
 
             flash("Usuário criado com sucesso", "success")
 
@@ -97,23 +93,19 @@ def profile_edit():
             if form.password1.data != form.password2.data and valid_pw(form.password1.data):
                 raise Exception
 
-            sess = Session()
-
-            user = sess.query(User).filter_by(id=current_user.id).first()
-            sess.delete(user)
-            sess.commit()
+            user = db.session.query(User).filter_by(id=current_user.id).first()
+            db.session.delete(user)
+            db.session.commit()
 
             user = User(
                 id=current_user.id,
-                matricula=form.matricula.data,
+                registration=form.matricula.data,
                 name=form.name.data,
                 password=bcrypt.generate_password_hash(form.password1.data),
-                professor=form.professor.data
+                role=form.professor.data
             )
-            sess.add(user)
-            sess.commit()
-
-            sess.close()
+            db.session.add(user)
+            db.session.commit()
 
             flash("Usuário editado", "success")
 

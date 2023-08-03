@@ -20,6 +20,7 @@ Mako==1.2.4
 MarkupSafe==2.1.2
 Pillow==9.5.0
 pypng==0.20220715.0
+python-dotenv==1.0.0
 qrcode==7.4.2
 requests==2.31.0
 SQLAlchemy==2.0.19

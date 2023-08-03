@@ -27,11 +27,11 @@ csrf = CSRFProtect(app)
 # lazy imports
 from auth.loaders import load_user
 from cli_cmds import seed_cli
-from controllers import account, chamada
+from controllers import account, rollcall
 
 # blueprints
 app.register_blueprint(account.account_app, url_prefix="/account")
-app.register_blueprint(chamada.chamada_app, url_prefix="/")
+app.register_blueprint(rollcall.chamada_app, url_prefix="/")
 
 # cli
 app.cli.add_command(seed_cli)

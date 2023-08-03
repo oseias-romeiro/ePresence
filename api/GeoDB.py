@@ -1,7 +1,7 @@
 from requests import request
 from math import sqrt
-from config import config
 
+from app import config
 key = config.RAPID_KEY
 
 URL = "https://wft-geo-db.p.rapidapi.com/v1/geo"

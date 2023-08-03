@@ -20,5 +20,5 @@ class User(UserMixin, db.Model):
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False)
 
     def __repr__(self):
-        return "mat: %r" % self.registration
+        return "reg: %r" % self.registration
 

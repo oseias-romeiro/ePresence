@@ -90,7 +90,7 @@ def class_students(id_class):
         students = db.session.query(User).join(UserClass).filter_by(id_class=id_class).all()
         
         form_student = AddAluno()
-        return render_template("chamada/list_students.jinja2", students=students, id_class=id_class, form_student=form_student)
+        return render_template("rollcall/list_students.jinja2", students=students, id_class=id_class, form_student=form_student)
     
     except Exception as e:
         flash("Error listing users", "danger")
@@ -210,7 +210,7 @@ def turma_frequencias(id_class):
         flash("Erro ao coletar frequencias", "danger")
         return redirect(url_for("chamada_app.home"))
         
-    return render_template("chamada/frequencias.jinja2", chamadas=chamadas_frequencias, id_class=id_class)
+    return render_template("rollcall/frequencias.jinja2", chamadas=chamadas_frequencias, id_class=id_class)
 
 
 @chamada_app.route("/frequencias/<int:id_chamada>/confirm", methods=["GET"])
@@ -218,7 +218,7 @@ def turma_frequencias(id_class):
 def frequencia_confirm(id_chamada):
     expiration = request.args.get("expiration")
 
-    return render_template("chamada/confirm_frequencia.jinja2", expiration=expiration, id_chamada=id_chamada)
+    return render_template("rollcall/confirm_frequencia.jinja2", expiration=expiration, id_chamada=id_chamada)
     
 
 @chamada_app.route("/frequencias/<int:id_chamada>/new", methods=["POST"])
@@ -281,7 +281,7 @@ def frequencia_lista(id_chamada):
         return redirect(url_for("chamada_app.home"))
 
     dia = datetime.datetime.strptime(dia.split(" ")[0], "%Y-%m-%d")
-    return render_template("chamada/lista.jinja2", students=students, dia=dia.strftime("%d/%m/%Y"), id_chamada=id_chamada)
+    return render_template("rollcall/lista.jinja2", students=students, dia=dia.strftime("%d/%m/%Y"), id_chamada=id_chamada)
 
 
 @chamada_app.route("/frequencias/<int:id_chamada>/student/<int:id_user>/rejeitar", methods=["GET"])

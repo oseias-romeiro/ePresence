@@ -15,7 +15,7 @@ class Call(db.Model):
 
     __table_args__ = (UniqueConstraint(date, id_class, name="constDateClass"),)
 
-    fclass: Mapped["Class"] = relationship(foreign_keys="Call.id_class")
+    f_class: Mapped["Class"] = relationship(foreign_keys="Call.id_class")
 
     frequencies:  Mapped[list["Frequency"]] = relationship(back_populates="call")
 
@@ -40,8 +40,8 @@ class Class(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(127), nullable=False)
 
-    user_class:  Mapped[list["UserClass"]] = relationship(back_populates="class")
-    calls:  Mapped[list["Call"]] = relationship(back_populates="class")
+    user_class:  Mapped[list["UserClass"]] = relationship(back_populates="f_class")
+    calls:  Mapped[list["Call"]] = relationship(back_populates="f_class")
 
 
 class UserClass(db.Model):

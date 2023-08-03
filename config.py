@@ -1,13 +1,13 @@
-import os
-from dotenv import load_dotenv
+import os, dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-load_dotenv()
+dotenv.load_dotenv()
 
 class Config(object):
     TESTING = False
-    SECRET_KEY = os.getenv("SECRET_KEY",) # In production, should be set to a random string
+    SECRET_KEY = os.getenv("SECRET_KEY") # In production, should be set to a random string
     SQLALCHEMY_ECHO = os.environ.get("SQLALCHEMY_ECHO", False) # Print in console all SQL commands
+    RAPID_KEY = os.getenv("RAPID_KEY")
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")# mysql://user@localhost/foo
