@@ -1,9 +1,9 @@
-from db import Session
+from app import db
 from functools import wraps
 from flask import flash, redirect, url_for
 from flask_login import current_user
 
-from models.Chamada import Turmas
+from models.Call import UserClass
     
     
 def prof_required(func):

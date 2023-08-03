@@ -1,15 +1,16 @@
 from flask import Blueprint, request, render_template, flash, redirect, url_for, Response
 from flask_login import login_required
 from flask_login import current_user
-from datetime import datetime, timedelta
-import qrcode, io
+import qrcode, io, datetime
 
-from db import Session
+
+from app import db
 from models.User import User
-from models.Chamada import Chamada, Frequencia, Turma, Turmas
+from models.Call import Call, Frequency, Class, UserClass
 from help.required import prof_required
 from forms.TurmaForm import TurmaForm, AddAluno
 from api.GeoDB import get_nearby_cities, get_distance
+
 
 chamada_app = Blueprint("chamada_app", __name__)
 
@@ -17,144 +18,133 @@ chamada_app = Blueprint("chamada_app", __name__)
 @chamada_app.route("/home", methods=["GET"])
 @login_required
 def home():
-    with Session() as sess: minhas_turmas = sess.query(Turma).join(Turmas).filter_by(id_user=current_user.id).all()
+    
+    minhas_turmas = db.session.query(Class).join(UserClass).filter_by(id_user=current_user.id).all()
 
     form_turma = TurmaForm()
 
     return render_template("home.jinja2", current_user=current_user, turmas=minhas_turmas, form_turma=form_turma)
 
 
-@chamada_app.route("/turmas/new", methods=["POST"])
+@chamada_app.route("/class/new", methods=["POST"])
 @login_required
 @prof_required
-def turma_new():
+def class_new():
 
     form = TurmaForm()
     if form.validate_on_submit():
         try:
-            sess = Session()
 
-            turma = Turma(name=form.name.data)
-            sess.add(turma)
-            sess.commit()
+            classe = Class(name=form.name.data)
+            db.session.add(classe)
+            db.session.commit()
 
-            turmas = Turmas(
+            turmas = Class(
                 id_user = current_user.id,
-                id_turma = turma.id
+                id_class = classe.id
             )
-            sess.add(turmas)
-            sess.commit()
+            db.session.add(turmas)
+            db.session.commit()
 
-            sess.close()
-
-            flash("Turma adicionada", "success")
+            flash("Class created", "success")
         except Exception as e:
-            flash("Erro ao adicionar turma", "danger")
+            flash("Error creating class", "danger")
     else:
-        flash("Token inválido", "danger")
+        flash("invalid token", "danger")
 
     return redirect(url_for("chamada_app.home"))
     
 
-@chamada_app.route("/turmas/<int:id_turma>/delete", methods=["GET"])
+@chamada_app.route("/class/<int:id_class>/delete", methods=["GET"])
 @login_required
 @prof_required
-def turma_delete(id_turma):
+def class_delete(id_class):
     try:
-        sess = Session()
 
-        turma = sess.query(Turma).filter_by(id=id_turma).first()
+        classe = db.session.query(Class).filter_by(id=id_class).first()
         
-        for c in turma.chamadas:
-            for f in c.frequencias:
-                sess.delete(f)
-            sess.delete(c)
+        for c in classe.calls:
+            for f in c.frequencies:
+                db.session.delete(f)
+            db.session.delete(c)
 
-        for t in turma.turmas:
-            sess.delete(t)
+        for t in classe.calls:
+            db.session.delete(t)
         
-        sess.delete(turma)
-        
-        sess.commit()
-        sess.close()
+        db.session.delete(classe)
+        db.session.commit()
 
-        flash("Turma removida", "success")
+        flash("Class removed", "success")
         return redirect(url_for("chamada_app.home"))
     except:
-        flash("Erro ao remover turma", "danger")
+        flash("Error removing class", "danger")
     
     return redirect(url_for("chamada_app.home"))
 
 
-@chamada_app.route("/turmas/<int:id_turma>/alunos", methods=["GET"])
+@chamada_app.route("/class/<int:id_class>/student", methods=["GET"])
 @login_required
 @prof_required
-def turma_alunos(id_turma):
+def class_students(id_class):
     try: 
-        with Session() as sess: alunos = sess.query(User).join(Turmas).filter_by(id_turma=id_turma).all()
+        students = db.session.query(User).join(UserClass).filter_by(id_class=id_class).all()
         
-        form_aluno = AddAluno()
-        return render_template("chamada/list_alunos.jinja2", alunos=alunos, id_turma=id_turma, form_aluno=form_aluno)
+        form_student = AddAluno()
+        return render_template("chamada/list_students.jinja2", students=students, id_class=id_class, form_student=form_student)
     
     except Exception as e:
-        flash("Erro ao listar usuarios", "danger")
+        flash("Error listing users", "danger")
         
     return redirect(url_for("chamada_app.home"))
 
 
-@chamada_app.route("/turmas/<int:id_turma>/alunos/<int:id_aluno>/delete", methods=["GET"])
+@chamada_app.route("/class/<int:id_class>/students/<int:id_student>/delete", methods=["GET"])
 @login_required
 @prof_required
-def aluno_delete(id_turma, id_aluno):
+def student_delete(id_class, id_student):
     try:
-        sess = Session()
+        classes = db.session.query(Class).filter_by(id_class=id_class, id_user=id_student).first()
         
-        turmas = sess.query(Turmas).filter_by(id_turma=id_turma, id_user=id_aluno).first()
+        db.session.delete(classes)
+        db.session.commit()
         
-        sess.delete(turmas)
-        sess.commit()
-
-        sess.close()
-        
-        flash("Aluno removido com sucesso", "success")
+        flash("Student removed", "success")
         
     except:
-        flash("Erro ao remover usuario", "danger")
+        flash("Error romoving student", "danger")
         
     return redirect(url_for("chamada_app.home"))
 
 
-@chamada_app.route("/turmas/<int:id_turma>/alunos/join", methods=["POST"])
+@chamada_app.route("/class/<int:id_class>/students/join", methods=["POST"])
 @login_required
 @prof_required
-def aluno_join(id_turma):
+def student_join(id_class):
     try:
         mat = request.form.get("mat")
-        sess = Session()
 
-        id_user = sess.query(User).filter_by(matricula=mat).first().id
-        print(mat, id_user)
-        turmas = Turmas(
+        id_user = db.session.query(User).filter_by(matricula=mat).first().id
+
+        user_class = UserClass(
             id_user = id_user,
-            id_turma = id_turma
+            id_class = id_class
         )
-        sess.add(turmas)
+        db.session.add(user_class)
+        db.session.commit()
+        
 
-        sess.commit()
-        sess.close()
-
-        flash("Aluno adicionado", "success")
+        flash("Student joined", "success")
         return redirect(url_for("chamada_app.home"))
     except:
-        flash("Erro ao adicionar aluno", "danger")
+        flash("Error joining student", "danger")
         
-    return redirect(url_for("chamada_app.add_aluno"))
+    return redirect(url_for("chamada_app.add_student"))
 
 
-@chamada_app.route("/turmas/<int:id_turma>/chamada/new", methods=["POST"])
+@chamada_app.route("/class/<int:id_class>/day/new", methods=["POST"])
 @login_required
 @prof_required
-def chamada_new(id_turma):
+def call_new(id_class):
     lat = request.form.get("lat")
     lon = request.form.get("lon")
 
@@ -163,20 +153,19 @@ def chamada_new(id_turma):
         geoloc = get_nearby_cities(lat,lon)
     
     try:
-        sess = Session()
-        dia = datetime.now()
-        chamada = Chamada(
-            date = dia.date(),
-            id_turma = id_turma,
+        day = datetime.datetime.now()
+        call = Call(
+            date = day.date(),
+            id_class = id_class,
             location = geoloc if geoloc else None
         )
-        sess.add(chamada)
-        sess.commit()
+        db.session.add(call)
+        db.session.commit()
 
-        return render_template("chamada/qrcode.jinja2", id_chamada=chamada.id)
+        return render_template("call/qrcode.jinja2", id_call=call.id)
         
     except Exception as e:
-        flash("Chamada já foi criada", "info")
+        flash("Call already has created", "info")
     
     return redirect(url_for("chamada_app.home"))
         
@@ -185,7 +174,7 @@ def chamada_new(id_turma):
 @login_required
 def gen_qrcode(id_chamada):
 
-    expiration = datetime.now() + timedelta(minutes=10)
+    expiration = datetime.datetime.now() + datetime.timedelta(minutes=10)
     temp_url = url_for("chamada_app.frequencia_confirm", expiration=expiration, id_chamada=id_chamada, _external=True)
     print("# url temporária:", temp_url)
 
@@ -201,29 +190,27 @@ def gen_qrcode(id_chamada):
     return Response(img_buffer, mimetype="image/png")
 
 
-@chamada_app.route("/turmas/<int:id_turma>/frequencias/show", methods=["GET"])
+@chamada_app.route("/class/<int:id_class>/frequencias/show", methods=["GET"])
 @login_required
-def turma_frequencias(id_turma):
+def turma_frequencias(id_class):
     chamadas_frequencias = []
     
     try:
-        sess = Session()
+        calls = db.session.query(Call).filter_by(id_class=id_class).all()
 
-        chamadas = sess.query(Chamada).filter_by(id_turma=id_turma).all()
-
-        for c in chamadas:
+        for c in calls:
             freqs = [f.id_chamada for f in c.frequencias]
             chamadas_frequencias.append({
                 "date": c.date,
                 "presente": c.id in freqs,
                 "id": c.id,
             })
-        sess.close()
+        
     except:
         flash("Erro ao coletar frequencias", "danger")
         return redirect(url_for("chamada_app.home"))
         
-    return render_template("chamada/frequencias.jinja2", chamadas=chamadas_frequencias, id_turma=id_turma)
+    return render_template("chamada/frequencias.jinja2", chamadas=chamadas_frequencias, id_class=id_class)
 
 
 @chamada_app.route("/frequencias/<int:id_chamada>/confirm", methods=["GET"])
@@ -252,17 +239,16 @@ def frequencia_new(id_chamada):
             flash("Código expirado", "danger")
             return redirect(url_for("chamada_app.home"))
 
-    freq = Frequencia(
+    freq = Frequency(
         id_user = current_user.id,
         id_chamada = id_chamada,
         location = geoloc if geoloc else None
     )
     try:
-        with Session() as sess:
-            sess.add(freq)
-            sess.commit()
+        db.session.add(freq)
+        db.session.commit()
             
-        flash("Frequencia registrada", "success")
+        flash("Frequency registrada", "success")
     except:
         flash("Houve um erro registrar frequencia", "danger")
     
@@ -275,10 +261,9 @@ def frequencia_lista(id_chamada):
     dia = request.args.get("dia")
 
     try:
-        sess = Session()
-        chamada = sess.query(Chamada).filter_by(id=id_chamada).first()
+        chamada = db.session.query(Chamada).filter_by(id=id_chamada).first()
         
-        alunos = []
+        students = []
         for f in chamada.frequencias:
             dist=None
             if f.location and chamada.location:
@@ -286,33 +271,30 @@ def frequencia_lista(id_chamada):
                     (f.location["latitude"], f.location["longitude"]),
                     (chamada.location["latitude"], chamada.location["longitude"])
                 )
-            alunos.append((
-                sess.query(User).filter_by(id=f.id_user).first(),
+            students.append((
+                db.session.query(User).filter_by(id=f.id_user).first(),
                 dist
             ))
-        sess.close()
+        
     except:
         flash("Houve um erro ao coletar a lista de frequecia", "danger")
         return redirect(url_for("chamada_app.home"))
 
-    dia = datetime.strptime(dia.split(" ")[0], "%Y-%m-%d")
-    return render_template("chamada/lista.jinja2", alunos=alunos, dia=dia.strftime("%d/%m/%Y"), id_chamada=id_chamada)
+    dia = datetime.datetime.strptime(dia.split(" ")[0], "%Y-%m-%d")
+    return render_template("chamada/lista.jinja2", students=students, dia=dia.strftime("%d/%m/%Y"), id_chamada=id_chamada)
 
 
-@chamada_app.route("/frequencias/<int:id_chamada>/aluno/<int:id_user>/rejeitar", methods=["GET"])
+@chamada_app.route("/frequencias/<int:id_chamada>/student/<int:id_user>/rejeitar", methods=["GET"])
 @login_required
 def frequencias_rejeitar(id_chamada, id_user):
     try:
-        sess = Session()
-        frequencias_list = sess.query(Frequencia).filter_by(id_user=id_user, id_chamada=id_chamada).all()
+        frequencias_list = db.session.query(Frequency).filter_by(id_user=id_user, id_chamada=id_chamada).all()
         
         for f in frequencias_list:
-            sess.delete(f)
+            db.session.delete(f)
+        db.session.commit()
         
-        sess.commit()
-        sess.close()
-
-        flash("Frequencia rejeitada com sucesso", "success")
+        flash("Frequency rejeitada com sucesso", "success")
         return redirect(url_for("chamada_app.home"))
     except:
         flash("Houve um erro rejeitar a frequencia", "danger")
