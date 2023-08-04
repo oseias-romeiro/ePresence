@@ -22,12 +22,12 @@ def sign_in_create():
 
     if form.validate_on_submit():
         user = db.session.query(User).filter_by(
-            registration=form.matricula.data
+            registration=form.register.data
         ).first()
 
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
-            return redirect(url_for("chamada_app.home"))
+            return redirect(url_for("call_app.home"))
         else:
             flash("Matricula/senha invalida", "danger")
             return redirect(url_for("account_app.sign_in"))
@@ -51,10 +51,10 @@ def sign_up_create():
                 raise Exception
 
             user = User(
-                registration=form.matricula.data,
+                registration=form.register.data,
                 name=form.name.data,
                 password=bcrypt.generate_password_hash(form.password1.data),
-                role=form.professor.data
+                role=form.role.data
             )
             db.session.add(user)
             db.session.commit()
@@ -76,9 +76,9 @@ def sign_up_create():
 def profile():
     form = SignUpForm()
     if request.method == "GET":
-        form.matricula.data = current_user.matricula
+        form.register.data = current_user.register
         form.name.data = current_user.name
-        form.professor.data = current_user.professor
+        form.role.data = current_user.role
 
         return render_template("account/profile.jinja2", form=form)
 
@@ -99,17 +99,17 @@ def profile_edit():
 
             user = User(
                 id=current_user.id,
-                registration=form.matricula.data,
+                registration=form.register.data,
                 name=form.name.data,
                 password=bcrypt.generate_password_hash(form.password1.data),
-                role=form.professor.data
+                role=form.role.data
             )
             db.session.add(user)
             db.session.commit()
 
             flash("Usuário editado", "success")
 
-            return redirect(url_for("chamada_app.home"))
+            return redirect(url_for("call_app.home"))
         except:
             flash("Entradas invalidas", "danger")
             return redirect(url_for("account_app.profile"))

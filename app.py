@@ -15,23 +15,24 @@ app = Flask(__name__)
 # configs
 config = get_config()
 app.config.from_object(config)
+app.secret_key = config.SECRET_KEY
 
 # extensions
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 bootstrap = Bootstrap5(app)
 bcrypt = Bcrypt(app)
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 csrf = CSRFProtect(app)
 
 # lazy imports
 from auth.loaders import load_user
 from cli_cmds import seed_cli
-from controllers import account, rollcall
+from controllers import account, call
 
 # blueprints
 app.register_blueprint(account.account_app, url_prefix="/account")
-app.register_blueprint(rollcall.chamada_app, url_prefix="/")
+app.register_blueprint(call.call_app, url_prefix="/")
 
 # cli
 app.cli.add_command(seed_cli)

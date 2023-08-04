@@ -4,29 +4,29 @@
     
     <div class="d-flex justify-content-center">
         <form method="post" autocomplete="off" style="width: 500px;">
-            <h2 style="text-align: center;">{% block title %}Cadastro{% endblock %}</h2>
+            <h2 style="text-align: center;">{% block title %}Register{% endblock %}</h2>
 
             {{ form.csrf_token }}
 
-            {{ form.matricula.label }}<br>
-            {{ form.matricula(class_="form-control") }}<br>
+            {{ form.register.label }}
+            {{ form.register(class_="form-control") }}
 
-            {{ form.name.label }}<br>
-            {{ form.name(class_="form-control") }}<br>
+            {{ form.name.label }}
+            {{ form.name(class_="form-control") }}
 
-            {{ form.password1.label }}<br>
-            {{ form.password1(class_="form-control") }}<br>
+            {{ form.password1.label }}
+            {{ form.password1(class_="form-control") }}
 
-            {{ form.password2.label }}<br>
-            {{ form.password2(class_="form-control") }}<br>
+            {{ form.password2.label }}
+            {{ form.password2(class_="form-control") }}
 
-            {{ form.professor.label }}: {{ form.professor }}<br>
+            {{ form.role.label }}: {{ form.role(class_="form-select") }}<br>
 
             <br>
             <div style="text-align: center;">
-                <button class="btn btn-primary" type="submit">Cadastrar</button>
-                <a href="/account/sign_in">
-                    <button class="btn btn-secondary" type="button" class="btn-cancel">Cancelar</button>
+                <button class="btn btn-primary" type="submit">Done</button>
+                <a href="{{ url_for('account_app.sign_in') }}">
+                    <button class="btn btn-secondary" type="button" class="btn-cancel">Cancel</button>
                 </a>
             </div>
         </form>

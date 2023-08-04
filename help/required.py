@@ -4,6 +4,7 @@ from flask import flash, redirect, url_for
 from flask_login import current_user
 
 from models.Call import UserClass
+from models.User import UserRole
     
     
 def prof_required(func):
@@ -15,22 +16,22 @@ def prof_required(func):
     def decorated(*args, **kwargs):
         id_turma = kwargs.get("id_turma")
 
-        if current_user.professor and id_turma:
+        if current_user.role == UserRole.PROFESSOR and id_turma:
             try:
-                with Session() as sess: turmas = sess.query(Turmas).filter_by(id_turma=id_turma, id_user=current_user.id).first()
+                turmas = db.session.query(UserClass).filter_by(id_turma=id_turma, id_user=current_user.id).first()
                 
                 if turmas:
                     return func(*args, **kwargs)
                 else:
-                    flash("Usuário não é professor dessa turma", "danger")
+                    flash("User is not a professor of this class", "danger")
             except:
-                flash("Erro ao consultar suas turmas", "danger")
+                flash("Error confering classes", "danger")
             
-        elif current_user.professor:
+        elif current_user.role == UserRole.PROFESSOR:
             return func(*args, **kwargs)
         else:
-            flash("Usuário não é professor", "danger")
+            flash("User is not a professor!", "danger")
 
-        return redirect(url_for("chamado.home"))
+        return redirect(url_for("call.home"))
         
     return decorated

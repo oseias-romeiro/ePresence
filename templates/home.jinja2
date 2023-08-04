@@ -9,7 +9,7 @@
     <ul class="list-group">
         <li class="list-group-item active">Turmas
             <div style="float: right;">
-                {% if current_user.professor %}
+                {% if current_user.role == role.PROFESSOR %}
                 <!-- Button trigger newTurmaModal -->
                 <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#newTurmaModal">
                     Criar turma
@@ -22,19 +22,19 @@
             <li class="list-group-item">
                 {{ t.name }}
                 <div style="float: right;">
-                    {% if current_user.professor %}
+                    {% if current_user.role == role.PROFESSOR %}
                     <div class="dropdown dropstart">
                         <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         ...
                         </button>
                         <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('chamada_app.turma_alunos', id_turma=t.id) }}">Alunos</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('chamada_app.turma_delete', id_turma=t.id) }}">Remover</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('chamada_app.turma_frequencias', id_turma=t.id) }}">Chamada</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('call_app.class_students', id_class=t.id) }}">Alunos</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('call_app.class_delete', id_class=t.id) }}">Remover</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('call_app.class_frequency', id_class=t.id) }}">Chamada</a></li>
                         </ul>
                     </div>
                     {% else %}
-                    <a href="{{ url_for('chamada_app.turma_frequencias', id_turma=t.id) }}">Chamada</a>
+                    <a href="{{ url_for('call_app.class_frequency', id_class=t.id) }}">Chamada</a>
                     {% endif %}
                 </div>
             </li>
@@ -52,7 +52,7 @@
             <div class="modal-header">
             <h5 class="modal-title" id="newTurmaModalLabel">Nova turma</h5>
             </div>
-            <form method="post" action="{{ url_for('chamada_app.turma_new') }}" autocomplete="off">
+            <form method="post" action="{{ url_for('call_app.class_new') }}" autocomplete="off">
                 <div class="modal-body">
                     {{ form_turma.csrf_token }}
         
