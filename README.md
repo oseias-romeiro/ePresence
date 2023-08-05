@@ -44,11 +44,28 @@ Variaveis de ambiente são configurados em [config.py](./config.py)
 
 <img src="static/media/tutorial.gif">
 
+
+## Setup
+
+### database
+```sh
+flask db init
+flask db migrate -m "init"
+flask db upgrade
+```
+
+### seeds
+```sh
+flask seed users
+flask seed classes
+flask seed user_class
+```
+
 ## Execução 
 
 ```sh
-  pip install -r requirements.txt
-  python3 app.py
+pip install -r requirements.txt
+unicorn -b "0.0.0.0:5000" wsgi:app
 ```
 
 Acesse: [localhost:5000](http://localhost:5000)
