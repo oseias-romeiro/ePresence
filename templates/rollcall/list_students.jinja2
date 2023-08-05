@@ -1,0 +1,55 @@
+
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <h2>
+        {% block title %}Students{% endblock %}
+        <!-- Button trigger newStudentModal -->
+        <button style="float: right;" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newStudentModal">
+            Add student
+        </button>
+    </h2>
+    <br>
+    <table class="table">
+        <tr>
+            <th>Register</th>
+            <th>Name</th>
+            <th>Action</th>
+        </tr>
+        {% for s in students %}
+        <tr>
+            <td>{{ s.register }}</td>
+            <td>{{ s.name }}</td>
+            <td>
+                <a href="{{ url_for('call_app.student_delete', slug=slug, register=s.register ) }}">Remove</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Modal: add student -->
+    <div class="modal fade" id="newStudentModal" tabindex="-1" role="dialog" aria-labelledby="newStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="newStudentModalLabel">Add student</h5>
+            </div>
+            <form method="post" action="{{ url_for('call_app.student_join', slug=slug ) }}" autocomplete="off">
+                <div class="modal-body">
+                    {{ form_join.csrf_token }}
+
+                    {{ form_join.register.label }}<br>
+                    {{ form_join.register(class_="form-control", type_="number") }}<br>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+
+{% endblock %}
+

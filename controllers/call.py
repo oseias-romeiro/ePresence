@@ -19,11 +19,11 @@ call_app = Blueprint("call_app", __name__)
 @login_required
 def home():
     
-    minhas_turmas = db.session.query(Class).join(UserClass).filter_by(id_user=current_user.id).all()
+    classes = db.session.query(Class).join(UserClass).filter_by(register=current_user.register).all()
 
-    form_turma = ClassForm()
+    class_form = ClassForm()
 
-    return render_template("home.jinja2", current_user=current_user, turmas=minhas_turmas, form_turma=form_turma, role=UserRole)
+    return render_template("home.jinja2", current_user=current_user, classes=classes, class_form=class_form, role=UserRole)
 
 
 @call_app.route("/class/new", methods=["POST"])
@@ -55,21 +55,23 @@ def class_new():
     return redirect(url_for("call_app.home"))
     
 
-@call_app.route("/class/<int:id_class>/delete", methods=["GET"])
+@call_app.route("/class/<slug>/delete", methods=["GET"])
 @login_required
 @prof_required
-def class_delete(id_class):
+def class_delete(slug):
     try:
 
-        classe = db.session.query(Class).filter_by(id=id_class).first()
+        classe = db.session.query(Class).filter_by(slug=slug).first()
         
+        # remove rollscall
         for c in classe.calls:
-            for f in c.frequencies:
-                db.session.delete(f)
+            for f in c.frequencies: db.session.delete(f)
             db.session.delete(c)
+        for t in classe.calls: db.session.delete(t)
 
-        for t in classe.calls:
-            db.session.delete(t)
+        # remove users from class
+        for u in classe.user_class:
+            db.session.delete(u)
         
         db.session.delete(classe)
         db.session.commit()
@@ -82,63 +84,64 @@ def class_delete(id_class):
     return redirect(url_for("call_app.home"))
 
 
-@call_app.route("/class/<int:id_class>/student", methods=["GET"])
+@call_app.route("/class/<slug>/students", methods=["GET"])
 @login_required
 @prof_required
-def class_students(id_class):
+def class_students(slug:str):
     try: 
-        students = db.session.query(User).join(UserClass).filter_by(id_class=id_class).all()
-        
-        form_student = JoinStudent()
-        return render_template("rollcall/list_students.jinja2", students=students, id_class=id_class, form_student=form_student)
+        students = db.session.query(User).filter_by(role=UserRole.STUDENT).join(UserClass).filter_by(slug=slug).all()
+        print(students)
+        return render_template("rollcall/list_students.jinja2", students=students, slug=slug, form_join=JoinStudent())
     
     except Exception as e:
+        print(e)
         flash("Error listing users", "danger")
         
     return redirect(url_for("call_app.home"))
 
 
-@call_app.route("/class/<int:id_class>/students/<int:id_student>/delete", methods=["GET"])
+@call_app.route("/class/<slug>/student/<register>/delete", methods=["GET"])
 @login_required
 @prof_required
-def student_delete(id_class, id_student):
+def student_delete(slug, register):
     try:
-        classes = db.session.query(Class).filter_by(id_class=id_class, id_user=id_student).first()
+        user_class = db.session.query(UserClass).filter_by(slug=slug, register=register).first()
         
-        db.session.delete(classes)
+        db.session.delete(user_class)
         db.session.commit()
         
         flash("Student removed", "success")
         
     except:
         flash("Error romoving student", "danger")
-        
-    return redirect(url_for("call_app.home"))
+    
+    return redirect(url_for("call_app.class_students", slug=slug))
 
 
-@call_app.route("/class/<int:id_class>/students/join", methods=["POST"])
+@call_app.route("/class/<slug>/students/join", methods=["POST"])
 @login_required
 @prof_required
-def student_join(id_class):
+def student_join(slug):
     try:
-        mat = request.form.get("mat")
+        register = request.form.get("register")
 
-        id_user = db.session.query(User).filter_by(matricula=mat).first().id
+        user = db.session.query(User).filter_by(register=register).first()
+        # check if user is student
+        if(not user.role == UserRole.STUDENT): raise Exception("User should be a Student")
 
+        # create association user and class
         user_class = UserClass(
-            id_user = id_user,
-            id_class = id_class
+            register = user.register,
+            slug = slug
         )
         db.session.add(user_class)
         db.session.commit()
         
-
         flash("Student joined", "success")
-        return redirect(url_for("call_app.home"))
-    except:
-        flash("Error joining student", "danger")
+    except Exception as e:
+        flash(e.__str__(), "danger")
         
-    return redirect(url_for("call_app.add_student"))
+    return redirect(url_for("call_app.class_students", slug=slug))
 
 
 @call_app.route("/class/<int:id_class>/day/new", methods=["POST"])
@@ -170,12 +173,12 @@ def call_new(id_class):
     return redirect(url_for("call_app.home"))
         
 
-@call_app.route("/frequencies/<int:id_chamada>/qrcode", methods=["GET"])
+@call_app.route("/frequencies/<int:id_call>/qrcode", methods=["GET"])
 @login_required
-def gen_qrcode(id_chamada):
+def gen_qrcode(id_call):
 
     expiration = datetime.datetime.now() + datetime.timedelta(minutes=10)
-    temp_url = url_for("call_app.frequencia_confirm", expiration=expiration, id_chamada=id_chamada, _external=True)
+    temp_url = url_for("call_app.frequencia_confirm", expiration=expiration, id_call=id_call, _external=True)
     print("# url temporária:", temp_url)
 
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
@@ -190,40 +193,40 @@ def gen_qrcode(id_chamada):
     return Response(img_buffer, mimetype="image/png")
 
 
-@call_app.route("/class/<int:id_class>/frequencies/show", methods=["GET"])
+@call_app.route("/class/<slug>/rollscall", methods=["GET"])
 @login_required
-def class_frequency(id_class):
-    chamadas_frequencias = []
+def class_frequency(slug):
+    call_freqs = []
     
     try:
-        calls = db.session.query(Call).filter_by(id_class=id_class).all()
+        calls = db.session.query(Call).filter_by(slug=slug).all()
 
         for c in calls:
-            freqs = [f.id_chamada for f in c.frequencias]
-            chamadas_frequencias.append({
+            freqs = [f.id_call for f in c.frequencies]
+            call_freqs.append({
                 "date": c.date,
-                "presente": c.id in freqs,
+                "present": c.id in freqs,
                 "id": c.id,
             })
         
     except:
-        flash("Erro ao coletar frequencias", "danger")
+        flash("Error collecting rollscall", "danger")
         return redirect(url_for("call_app.home"))
         
-    return render_template("rollcall/frequencies.jinja2", chamadas=chamadas_frequencias, id_class=id_class)
+    return render_template("rollcall/rollscall.jinja2", rollscall=call_freqs, slug=slug, role=UserRole)
 
 
-@call_app.route("/frequencies/<int:id_chamada>/confirm", methods=["GET"])
+@call_app.route("/frequencies/<int:id_call>/confirm", methods=["GET"])
 @login_required
-def frequencia_confirm(id_chamada):
+def frequencia_confirm(id_call):
     expiration = request.args.get("expiration")
 
-    return render_template("rollcall/confirm_frequencia.jinja2", expiration=expiration, id_chamada=id_chamada)
+    return render_template("rollcall/confirm_frequencia.jinja2", expiration=expiration, id_call=id_call)
     
 
-@call_app.route("/frequencies/<int:id_chamada>/new", methods=["POST"])
+@call_app.route("/frequencies/<int:id_call>/new", methods=["POST"])
 @login_required
-def frequencia_new(id_chamada):
+def frequencia_new(id_call):
     expiration = request.args.get("expiration")
     
     lat = request.form.get("lat")
@@ -236,12 +239,12 @@ def frequencia_new(id_chamada):
     if expiration is not None:
         expiration = datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
         if datetime.now() > expiration:
-            flash("Código expirado", "danger")
+            flash("Code expired", "danger")
             return redirect(url_for("call_app.home"))
 
     freq = Frequency(
         id_user = current_user.id,
-        id_chamada = id_chamada,
+        id_call = id_call,
         location = geoloc if geoloc else None
     )
     try:
@@ -255,21 +258,21 @@ def frequencia_new(id_chamada):
     return redirect(url_for("call_app.home"))
 
 
-@call_app.route("/frequencies/<int:id_chamada>/lista", methods=["GET"])
+@call_app.route("/frequencies/<int:id_call>/lista", methods=["GET"])
 @login_required
-def frequencia_lista(id_chamada):
+def frequencia_lista(id_call):
     dia = request.args.get("dia")
 
     try:
-        chamada = db.session.query(Chamada).filter_by(id=id_chamada).first()
+        call = db.session.query(Call).filter_by(id=id_call).first()
         
         students = []
-        for f in chamada.frequencias:
+        for f in call.frequencies:
             dist=None
-            if f.location and chamada.location:
+            if f.location and call.location:
                 dist = get_distance(
                     (f.location["latitude"], f.location["longitude"]),
-                    (chamada.location["latitude"], chamada.location["longitude"])
+                    (call.location["latitude"], call.location["longitude"])
                 )
             students.append((
                 db.session.query(User).filter_by(id=f.id_user).first(),
@@ -277,26 +280,26 @@ def frequencia_lista(id_chamada):
             ))
         
     except:
-        flash("Houve um erro ao coletar a lista de frequecia", "danger")
+        flash("Error listing frequencies", "danger")
         return redirect(url_for("call_app.home"))
 
     dia = datetime.datetime.strptime(dia.split(" ")[0], "%Y-%m-%d")
-    return render_template("rollcall/lista.jinja2", students=students, dia=dia.strftime("%d/%m/%Y"), id_chamada=id_chamada)
+    return render_template("rollcall/lista.jinja2", students=students, dia=dia.strftime("%d/%m/%Y"), id_call=id_call)
 
 
-@call_app.route("/frequencies/<int:id_chamada>/student/<int:id_user>/rejeitar", methods=["GET"])
+@call_app.route("/frequencies/<int:id_call>/student/<int:id_user>/rejeitar", methods=["GET"])
 @login_required
-def frequencias_rejeitar(id_chamada, id_user):
+def frequencias_rejeitar(id_call, id_user):
     try:
-        frequencias_list = db.session.query(Frequency).filter_by(id_user=id_user, id_chamada=id_chamada).all()
+        frequencias_list = db.session.query(Frequency).filter_by(id_user=id_user, id_call=id_call).all()
         
         for f in frequencias_list:
             db.session.delete(f)
         db.session.commit()
         
-        flash("Frequency rejeitada com sucesso", "success")
+        flash("Frequency rejected", "success")
         return redirect(url_for("call_app.home"))
     except:
-        flash("Houve um erro rejeitar a frequencia", "danger")
+        flash("Error rejecting frequency", "danger")
         return redirect(url_for("call_app.home"))
 

@@ -3,15 +3,15 @@
 
 {% block content %}
     <h2>
-        {% block title %}Frequencias{% endblock %}
+        {% block title %}Rolls Call{% endblock %}
         
-        {% if current_user.professor %}
-            <form action="{{ url_for('chamada_app.chamada_new', id_turma=id_turma)}}" method="post">
+        {% if current_user.role == role.PROFESSOR %}
+            <form action="{{ url_for('call_app.call_new', id_class=id_class)}}" method="post">
                 <input hidden id="lat" type="text" name="lat" value="">
                 <input hidden id="lon" type="text" name="lon" value="">
                 
                 <button style="float: right;" class="btn btn-primary" type="submit">
-                    Adicionar chamada
+                    Add rollscall
                 </button>
             </form>
         {% endif %}
@@ -19,20 +19,20 @@
     <br>
     <table class="table">
         <tr>
-            <th>Data</th>
-            {% if current_user.professor %}
+            <th>Date</th>
+            {% if current_user.role == role.PROFESSOR %}
             <th>Action</th>
             {% else %}
-            <th>Frequencia</th>
+            <th>Frequencie</th>
             {% endif %}
         </tr>
-        {% for c in chamadas %}
+        {% for c in calls %}
         <tr>
             <td>{{ c["date"] }}</td>
-            {% if current_user.professor %}
+            {% if current_user.role == role.PROFESSOR %}
             <td>
-                <a href="{{ url_for('chamada_app.frequencia_lista', id_chamada=c['id'], dia= c['date']) }}" style="text-decoration: none;">
-                    lista
+                <a href="{{ url_for('call_app.frequencie_list', id_call=c['id'], date=c['date']) }}" style="text-decoration: none;">
+                    list
                 </a>
             </td>
             {% else %}

@@ -12,15 +12,15 @@
                 {% if current_user.role == role.PROFESSOR %}
                 <!-- Button trigger newTurmaModal -->
                 <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#newTurmaModal">
-                    Criar turma
+                    Create class
                 </button>
                 {% endif %}
             </div>
         </li>
-        {% if turmas %}
-            {% for t in turmas %}
+        {% if classes %}
+            {% for c in classes %}
             <li class="list-group-item">
-                {{ t.name }}
+                {{ c.name }}
                 <div style="float: right;">
                     {% if current_user.role == role.PROFESSOR %}
                     <div class="dropdown dropstart">
@@ -28,13 +28,13 @@
                         ...
                         </button>
                         <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('call_app.class_students', id_class=t.id) }}">Alunos</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('call_app.class_delete', id_class=t.id) }}">Remover</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('call_app.class_frequency', id_class=t.id) }}">Chamada</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('call_app.class_students', slug=c.slug) }}">Students</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('call_app.class_delete', slug=c.slug) }}">Remove</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('call_app.class_frequency', slug=c.slug) }}">RollsCall</a></li>
                         </ul>
                     </div>
                     {% else %}
-                    <a href="{{ url_for('call_app.class_frequency', id_class=t.id) }}">Chamada</a>
+                    <a href="{{ url_for('call_app.class_frequency', slug=c.slug) }}">RollsCall</a>
                     {% endif %}
                 </div>
             </li>
@@ -54,14 +54,14 @@
             </div>
             <form method="post" action="{{ url_for('call_app.class_new') }}" autocomplete="off">
                 <div class="modal-body">
-                    {{ form_turma.csrf_token }}
+                    {{ class_form.csrf_token }}
         
-                    {{ form_turma.name.label }}<br>
-                    {{ form_turma.name(class_="form-control") }}
+                    {{ class_form.name.label }}<br>
+                    {{ class_form.name(class_="form-control") }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Criar</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
                 </div>
             </form>
         </div>

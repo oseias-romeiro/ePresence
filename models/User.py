@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Enum
+from sqlalchemy import String, Enum, Integer, Sequence, text
 from flask_login import UserMixin
 import enum 
 
@@ -10,15 +10,20 @@ class UserRole(enum.Enum):
     PROFESSOR = "Professor"
     STUDENT = "Student"
 
+    def __str__(self):
+        return self.name
+    def __html__(self):
+        return self.value
+
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    registration: Mapped[str] = mapped_column(String(9), nullable=False, unique=True)
+    register: Mapped[str] = mapped_column(Integer, unique=True)
     name: Mapped[str] = mapped_column(String(127), nullable=False)
     password: Mapped[str] = mapped_column(String(127), nullable=False)
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False)
 
     def __repr__(self):
-        return "reg: %r" % self.registration
+        return "user: (%d, %s, %s, %s)" % (self.id, self.register, self.name, self.role)
 

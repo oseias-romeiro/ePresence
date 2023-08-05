@@ -3,34 +3,32 @@
 {% block content %}
     
     <div class="d-flex justify-content-center">
-        <form method="post" autocomplete="off" style="max-width: 500px;">
-            <h2>{% block title %}Editando{% endblock %} perfil</h2>
+        <form class="form" method="post" autocomplete="off">
+            <h2>{% block title %}Edit{% endblock %} profile</h2>
             <br>
             {{ form.csrf_token }}
 
-            {{ form.matricula.label }}<br>
-            {{ form.matricula(class_="form-control") }}<br>
+            {{ form.name.label }}
+            {{ form.name(class_="form-control") }}
 
-            {{ form.name.label }}<br>
-            {{ form.name(class_="form-control") }}<br>
+            {{ form.password1.label }}
+            {{ form.password1(class_="form-control") }}
 
-            {{ form.password1.label }}<br>
-            {{ form.password1(class_="form-control") }}<br>
+            {{ form.password2.label }}
+            {{ form.password2(class_="form-control") }}
 
-            {{ form.password2.label }}<br>
-            {{ form.password2(class_="form-control") }}<br>
-
-            {{ form.professor.label }}<br>
-            {{ form.professor }}<br>
+            {{ form.role.label }}: {{ form.role(class_="form-select") }}<br>
 
             <br>
-            <div style="text-align: center;">
-                <button class="btn btn-primary" type="submit">Editar</button>
-                <a href="/">
-                    <button class="btn btn-secondary" type="button" class="btn-cancel">Cancelar</button>
-                </a>
-                <br>
+            <div class="row">
+                <div class="col">
+                    <button class="btn btn-success" type="submit">Edit</button>
+                </div>
+                <div class="col">
+                    <a href="{{ url_for('call_app.home') }}" class="btn btn-dark" type="button" class="btn-cancel">Cancel</a>
+                </div>
             </div>
+            <br>
         </form>
     </div>
     

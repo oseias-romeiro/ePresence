@@ -39,6 +39,7 @@ class Class(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(127), nullable=False)
+    slug: Mapped[str] = mapped_column(String(30), nullable=False, unique=True)
 
     user_class:  Mapped[list["UserClass"]] = relationship(back_populates="f_class")
     calls:  Mapped[list["Call"]] = relationship(back_populates="f_class")
@@ -48,8 +49,8 @@ class UserClass(db.Model):
     __tablename__ = "user_class"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    id_user: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    id_class: Mapped[int] = mapped_column(ForeignKey("class.id"))
+    register: Mapped[int] = mapped_column(ForeignKey("users.register"))
+    slug: Mapped[str] = mapped_column(ForeignKey("class.slug"))
 
-    user: Mapped["User"] = relationship(foreign_keys="UserClass.id_user")
-    f_class: Mapped["Class"] = relationship(foreign_keys="UserClass.id_class")
+    user: Mapped["User"] = relationship(foreign_keys="UserClass.register")
+    f_class: Mapped["Class"] = relationship(foreign_keys="UserClass.slug")

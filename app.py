@@ -43,11 +43,11 @@ def index():
 
 @app.errorhandler(401)
 def custom_401(error):
-    flash("Faça o login primeiro", "danger")
+    flash("Need login", "danger")
     return redirect(url_for("account_app.sign_in"))
 
 
 @app.errorhandler(404)
 def custom_404(error):
-    return redirect(url_for("index"))
+    return render_template("handler/404.jinja2")
 

@@ -2,8 +2,7 @@ from flask import Blueprint, render_template, request, redirect, flash, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 
 from app import db, bcrypt
-from models.User import User
-from help.validators import valid_pw
+from models.User import User, UserRole
 from forms.LoginForm import SignInForm, SignUpForm
 
 account_app = Blueprint("account_app", __name__)
@@ -22,18 +21,19 @@ def sign_in_create():
 
     if form.validate_on_submit():
         user = db.session.query(User).filter_by(
-            registration=form.register.data
+            register=form.register.data
         ).first()
 
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
             return redirect(url_for("call_app.home"))
         else:
-            flash("Matricula/senha invalida", "danger")
-            return redirect(url_for("account_app.sign_in"))
+            flash("Invalid inputs", "danger")
     else:
-        flash("Token invalido", "danger")
-        return redirect(url_for("account_app.sign_in"))
+        errors = list(form.errors.values())[0][0]
+        flash(errors, "danger")
+        
+    return redirect(url_for("account_app.sign_in"))
 
 
 @account_app.route("/sign_up", methods=["GET"])
@@ -47,28 +47,25 @@ def sign_up_create():
 
     if form.validate_on_submit():
         try:
-            if form.password1.data != form.password2.data and valid_pw(form.password1.data):
-                raise Exception
-
             user = User(
-                registration=form.register.data,
                 name=form.name.data,
+                register=db.session.query(User).order_by(User.register.desc()).first().register+1,
                 password=bcrypt.generate_password_hash(form.password1.data),
                 role=form.role.data
             )
             db.session.add(user)
             db.session.commit()
 
-            flash("Usuário criado com sucesso", "success")
+            flash(f"User created (register: {user.register})", "success")
 
             return redirect(url_for("account_app.sign_in"))
         except Exception as e:
-            print(e)
-            flash("Entradas inválidas", "danger")
-            return redirect(url_for("account_app.sign_up"))
+            flash("Error persisting data", "danger")
     else:
-        flash("Token inválido", "danger")
-        return redirect(url_for("account_app.sign_in"))
+        errors = list(form.errors.values())[0][0]
+        flash(errors, "danger")
+    
+    return redirect(url_for("account_app.sign_up"))
 
 
 @account_app.route("/profile", methods=["GET"])
@@ -76,9 +73,8 @@ def sign_up_create():
 def profile():
     form = SignUpForm()
     if request.method == "GET":
-        form.register.data = current_user.register
         form.name.data = current_user.name
-        form.role.data = current_user.role
+        form.role.data = current_user.role.__str__()
 
         return render_template("account/profile.jinja2", form=form)
 
@@ -90,37 +86,26 @@ def profile_edit():
 
     if form.validate_on_submit():
         try:
-            if form.password1.data != form.password2.data and valid_pw(form.password1.data):
-                raise Exception
-
             user = db.session.query(User).filter_by(id=current_user.id).first()
-            db.session.delete(user)
+            user.name=form.name.data
+            user.password=bcrypt.generate_password_hash(form.password1.data)
+            user.role=form.role.data
             db.session.commit()
 
-            user = User(
-                id=current_user.id,
-                registration=form.register.data,
-                name=form.name.data,
-                password=bcrypt.generate_password_hash(form.password1.data),
-                role=form.role.data
-            )
-            db.session.add(user)
-            db.session.commit()
-
-            flash("Usuário editado", "success")
-
+            flash("User edited", "success")
             return redirect(url_for("call_app.home"))
-        except:
-            flash("Entradas invalidas", "danger")
-            return redirect(url_for("account_app.profile"))
+        except Exception as e:
+            flash("Erro in persist data", "danger")
     else:
-        flash("Token inválido", "danger")
-        return redirect(url_for("account_app.profile"))
+        errors = list(form.errors.values())[0][0]
+        flash(errors, "danger")
+
+    return redirect(url_for("account_app.profile"))
     
 
 @account_app.route("/logout", methods=["GET"])
 @login_required
 def log_out():
     logout_user()
-    flash("Saindo...", "success")
+    flash("Exited", "success")
     return redirect(url_for("account_app.sign_in"))

@@ -3,27 +3,28 @@
 {% block content %}
 
     <div class="d-flex justify-content-center">
-        <form method="post" autocomplete="off" style="width: 500px;">
+        <form class="form" method="post" autocomplete="off">
             <h2 style="text-align: center;">{% block title %}Login{% endblock %}</h2>
-            <br>
-
+            
+            <hr>
             {{ form.csrf_token }}
 
-            {{ form.register.label }}<br>
-            {{ form.register(class_="form-control") }}<br>
+            {{ form.register.label }}
+            {{ form.register(class_="form-control") }}
 
-            {{ form.password.label }}<br>
-            {{ form.password(class_="form-control") }}<br>
+            {{ form.password.label }}
+            {{ form.password(class_="form-control") }}
+
             <br>
-
-            <div style="text-align: center;">
-                <button class="btn btn-primary" type="submit">Login</button>
-                <a href="/">
-                    <button class="btn btn-secondary" type="button" class="btn-cancel">Cancel</button>
-                </a>
-                <br>
-                <a href="/account/sign_up">Create account</a>
+            <div class="row">
+                <div class="col">
+                    <button class="btn btn-primary" type="submit">Login</button>
+                </div>
+                <div class="col">
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary" type="button" class="btn-cancel">Cancel</a>
+                </div>
             </div>
+            <a href="/account/sign_up">Create account</a>
         </form>
     </div>
     

@@ -8,19 +8,16 @@ from models.User import UserRole
     
     
 def prof_required(func):
-    """
-        Verifica se o usuario é professor e caso o id_turma seja um parametro do controlller, verifica também se o professor está na turma
-    """
-
+    
     @wraps(func)
     def decorated(*args, **kwargs):
-        id_turma = kwargs.get("id_turma")
+        id_class = kwargs.get("id_class")
 
-        if current_user.role == UserRole.PROFESSOR and id_turma:
+        if current_user.role == UserRole.PROFESSOR and id_class:
             try:
-                turmas = db.session.query(UserClass).filter_by(id_turma=id_turma, id_user=current_user.id).first()
+                classe = db.session.query(UserClass).filter_by(id_class=id_class, id_user=current_user.id).first()
                 
-                if turmas:
+                if classe:
                     return func(*args, **kwargs)
                 else:
                     flash("User is not a professor of this class", "danger")
@@ -32,6 +29,6 @@ def prof_required(func):
         else:
             flash("User is not a professor!", "danger")
 
-        return redirect(url_for("call.home"))
+        return redirect(url_for("call_app.home"))
         
     return decorated
