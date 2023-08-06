@@ -2,9 +2,9 @@
 
 {% block content %}
 
-<div class="card d-flex justify-content-center align-items-center" style="background-color: rgba(0, 0, 0, 0.366); padding: 20px;">
+<div class="card d-flex justify-content-center align-items-center" style="background-color: rgba(0, 0, 0, 0.702); padding: 20px;">
     <div class="text-center text-white">
-        <h1>ePresence</h1>
+        <h1>{% block title %}ePresence{% endblock %}</h1>
         <br>
         <img class="img-fluid rounded float-left" src="static/media/digital_education.jpg">
         <br><br>
@@ -18,7 +18,7 @@
 
 <style>
     body {
-        background-image: url("static/media/greenboard.jpg");
+        background-image: url("static/media/rollcall.png");
         background-repeat: no-repeat;
         background-size: cover;
     }

@@ -1,4 +1,5 @@
 from flask.cli import AppGroup
+import click
 
 from app import db, bcrypt
 from models.User import User
@@ -37,3 +38,13 @@ def seed_frequencies():
     for f in frequencies:
         db.session.add(Frequency(**f))
     db.session.commit()
+
+@seed_cli.command("all")
+@click.pass_context
+def seed_all(ctx: click.Context):
+    ctx.invoke(seed_users)
+    ctx.invoke(seed_classes)
+    ctx.invoke(seed_userclass)
+    ctx.invoke(seed_rollscall)
+    ctx.invoke(seed_frequencies)
+

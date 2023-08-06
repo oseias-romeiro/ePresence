@@ -2,6 +2,10 @@
 
 {% block content %}
 
-<h1>Page not found</h1>
-
+<div class="position-relative" style="height: 100%;">
+    <div class="position-absolute top-0 text-light" style="width: 50%; min-height: 100%; background-color: rgba(0, 0, 0, 0.518);">
+        <h1 class="text-center" style="padding-top: 50%;">{% block title %}404{% endblock %} - Page not found</h1>
+    </div>
+    <img class="img-fluid" style="width: 100%;" src="/static/media/looking.avif" alt="kid lookgin for book">
+</div>
 {% endblock %}
