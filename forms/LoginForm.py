@@ -10,7 +10,7 @@ class SignInForm(FlaskForm):
 
 
 class SignUpForm(FlaskForm):
-    name = StringField("Nome", validators=[input_required()])
+    name = StringField("Name", validators=[input_required()])
     password1 = PasswordField("Password", validators=[
         input_required(),
         EqualTo('password2', 'Passwords must match'),

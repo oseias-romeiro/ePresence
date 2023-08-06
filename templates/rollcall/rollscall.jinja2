@@ -6,9 +6,10 @@
         {% block title %}Rolls Call{% endblock %}
         
         {% if current_user.role == role.PROFESSOR %}
-            <form action="{{ url_for('call_app.call_new', id_class=id_class)}}" method="post">
-                <input hidden id="lat" type="text" name="lat" value="">
-                <input hidden id="lon" type="text" name="lon" value="">
+            <form action="{{ url_for('call_app.call_new', slug=slug)}}" method="post">
+                <input hidden name="csrf_token" value="{{ csrf_token() }}">
+                <input hidden id="lat" type="text" name="lat">
+                <input hidden id="lon" type="text" name="lon">
                 
                 <button style="float: right;" class="btn btn-primary" type="submit">
                     Add rollscall
@@ -22,48 +23,25 @@
             <th>Date</th>
             {% if current_user.role == role.PROFESSOR %}
             <th>Action</th>
-            {% else %}
+            {% elif current_user.role == role.STUDENT %}
             <th>Frequencie</th>
             {% endif %}
         </tr>
-        {% for c in calls %}
+        {% for c in rollscall %}
         <tr>
             <td>{{ c["date"] }}</td>
             {% if current_user.role == role.PROFESSOR %}
             <td>
-                <a href="{{ url_for('call_app.frequencie_list', id_call=c['id'], date=c['date']) }}" style="text-decoration: none;">
-                    list
-                </a>
+                <a href="{{ url_for('call_app.frequency_list', id_call=c['id'], date=c['date']) }}" style="text-decoration: none;">list</a>
             </td>
-            {% else %}
-            <td>{{ "Presente" if c["presente"] else "Ausente" }}</td>
+            {% elif current_user.role == role.STUDENT %}
+            <td>{{ "Present" if c["presente"] else "Absent" }}</td>
             {% endif %}
         </tr>
         {% endfor %}
     </table>
 
-    <script>
-        var lat, lon = "";
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                (position)=>{
-                    lat = position.coords.latitude;
-                    lon = position.coords.longitude;
-
-                    console.log(lat, lon);
-                },
-                (err) => {
-                    console.log(err.message);
-                    alert("Erro ao obter localização!");
-                }
-            );
-        } else {
-            alert("Navegador não suporta geolocalização!");
-        }
-        function redirect(path) {
-            window.location.href=path+`&lat=${lat}&lon=${lon}`;
-        }
-    </script>
+    <script src="/static/js/getLocation.js"></script>
 
 {% endblock %}
 

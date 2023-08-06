@@ -1,0 +1,27 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <h2>
+        {% block title %}Lista de frequencia{% endblock %} do dia: {{ dia }}
+    </h2>
+    <br>
+    <table class="table">
+        <tr>
+            <th>Register</th>
+            <th>Name</th>
+            <th>Distance</th>
+            <th>Action</th>
+        </tr>
+        {% for s in students %}
+            <tr>
+                <td>{{ s[0].register }}</td>
+                <td>{{ s[0].name }}</td>
+                <td>{{ s[1] if s[1]!=None else '' }}</td>
+                <td>
+                    <a href="{{ url_for('chamada_app.frequency_reject', id_call=id_call, id_user=s[0].id) }}">Reject</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}

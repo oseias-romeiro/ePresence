@@ -11,8 +11,8 @@ HEADERS = {
 }
 
 
-def get_distance(coordA: tuple, coordB: tuple) -> float:
-    return sqrt(pow(coordA[0]-coordB[0], 2) + pow(coordA[1]-coordB[1], 2))
+def get_distance(coordA, coordB) -> float:
+    return sqrt(pow(float(coordA[0])-float(coordB[0]), 2) + pow(float(coordA[1])-float(coordB[1]), 2))
 
 
 def get_nearby_cities(lat, lon) -> dict:

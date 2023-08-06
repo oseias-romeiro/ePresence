@@ -2,16 +2,14 @@
 {% extends "base.jinja2" %}
 
 {% block content %}
-    <h2>
-        {% block title %}Confirmação{% endblock %} de frequencia
-    </h2>
+    <h2>Attendance {% block title %}confirmation{% endblock %}</h2>
     <br>
     
     <div class="d-flex justify-content-center">
-        <form action="{{ url_for('chamada_app.frequencia_new', id_chamada=id_chamada, expiration=expiration)}}" method="post">
-            <input hidden id="lat" type="text" name="lat" value="">
-            <input hidden id="lon" type="text" name="lon" value="">
-            <button class="btn btn-primary" type="submit">Confirmar</button>
+        <form action="{{ url_for('chamada_app.frequency_new', id_call=id_call, expiration=expiration)}}" method="post">
+            <input hidden id="lat" type="text" name="lat" value="" >
+            <input hidden id="lon" type="text" name="lon" value="" onchange="()=>{alert('Localization getted')}">
+            <button class="btn btn-primary" type="submit">Confirm</button>
         </form>
     </div>
 

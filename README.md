@@ -58,14 +58,15 @@ flask db upgrade
 ```sh
 flask seed users
 flask seed classes
-flask seed user_class
+flask seed userclass
+flask seed rollscall
 ```
 
 ## Execução 
 
 ```sh
 pip install -r requirements.txt
-unicorn -b "0.0.0.0:5000" wsgi:app
+gunicorn -b "0.0.0.0:5000" wsgi:app
 ```
 
 Acesse: [localhost:5000](http://localhost:5000)

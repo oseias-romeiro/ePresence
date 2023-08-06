@@ -2,12 +2,13 @@
 
 {% block content %}
     <h2>
-        {% block title %}Bem vindo{% endblock %}, {{ current_user.name }}.
+        {% block title %}Wellcome{% endblock %}, {{ current_user.name }}.
     </h2>
     <br>
 
     <ul class="list-group">
-        <li class="list-group-item active">Turmas
+        <li class="list-group-item bg-success text-light">
+            <h3 style="float: left;">Classes</h3>
             <div style="float: right;">
                 {% if current_user.role == role.PROFESSOR %}
                 <!-- Button trigger newTurmaModal -->

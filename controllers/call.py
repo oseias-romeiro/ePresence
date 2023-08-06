@@ -11,7 +11,6 @@ from help.required import prof_required
 from forms.ClassForm import ClassForm, JoinStudent
 from api.GeoDB import get_nearby_cities, get_distance
 
-
 call_app = Blueprint("call_app", __name__)
 
 
@@ -90,7 +89,6 @@ def class_delete(slug):
 def class_students(slug:str):
     try: 
         students = db.session.query(User).filter_by(role=UserRole.STUDENT).join(UserClass).filter_by(slug=slug).all()
-        print(students)
         return render_template("rollcall/list_students.jinja2", students=students, slug=slug, form_join=JoinStudent())
     
     except Exception as e:
@@ -144,30 +142,27 @@ def student_join(slug):
     return redirect(url_for("call_app.class_students", slug=slug))
 
 
-@call_app.route("/class/<int:id_class>/day/new", methods=["POST"])
+@call_app.route("/class/<slug>/day/new", methods=["POST"])
 @login_required
 @prof_required
-def call_new(id_class):
+def call_new(slug):
     lat = request.form.get("lat")
     lon = request.form.get("lon")
-
-    geoloc=None
-    if lat and lon:
-        geoloc = get_nearby_cities(lat,lon)
-    
     try:
-        day = datetime.datetime.now()
+        if (lat and lon): coordinate = "%s,%s"%(lon,lat)
+        else: coordinate = None
         call = Call(
-            date = day.date(),
-            id_class = id_class,
-            location = geoloc if geoloc else None
+            date = datetime.datetime.now().date(),
+            slug = slug,
+            coordinate = coordinate
         )
         db.session.add(call)
         db.session.commit()
 
-        return render_template("call/qrcode.jinja2", id_call=call.id)
+        return render_template("rollscall/qrcode.jinja2", id_call=call.id)
         
     except Exception as e:
+        print(e)
         flash("Call already has created", "info")
     
     return redirect(url_for("call_app.home"))
@@ -178,8 +173,8 @@ def call_new(id_class):
 def gen_qrcode(id_call):
 
     expiration = datetime.datetime.now() + datetime.timedelta(minutes=10)
-    temp_url = url_for("call_app.frequencia_confirm", expiration=expiration, id_call=id_call, _external=True)
-    print("# url temporária:", temp_url)
+    temp_url = url_for("call_app.frequency_confirm", expiration=expiration, id_call=id_call, _external=True)
+    print("# temp url:", temp_url)
 
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
     qr.add_data(temp_url)
@@ -204,12 +199,12 @@ def class_frequency(slug):
         for c in calls:
             freqs = [f.id_call for f in c.frequencies]
             call_freqs.append({
-                "date": c.date,
+                "date": c.date.strftime("%m/%d/%Y"),
                 "present": c.id in freqs,
                 "id": c.id,
             })
         
-    except:
+    except Exception as e:
         flash("Error collecting rollscall", "danger")
         return redirect(url_for("call_app.home"))
         
@@ -218,7 +213,7 @@ def class_frequency(slug):
 
 @call_app.route("/frequencies/<int:id_call>/confirm", methods=["GET"])
 @login_required
-def frequencia_confirm(id_call):
+def frequency_confirm(id_call):
     expiration = request.args.get("expiration")
 
     return render_template("rollcall/confirm_frequencia.jinja2", expiration=expiration, id_call=id_call)
@@ -226,7 +221,7 @@ def frequencia_confirm(id_call):
 
 @call_app.route("/frequencies/<int:id_call>/new", methods=["POST"])
 @login_required
-def frequencia_new(id_call):
+def frequency_new(id_call):
     expiration = request.args.get("expiration")
     
     lat = request.form.get("lat")
@@ -258,10 +253,10 @@ def frequencia_new(id_call):
     return redirect(url_for("call_app.home"))
 
 
-@call_app.route("/frequencies/<int:id_call>/lista", methods=["GET"])
+@call_app.route("/frequencies/<int:id_call>/list", methods=["GET"])
 @login_required
-def frequencia_lista(id_call):
-    dia = request.args.get("dia")
+def frequency_list(id_call):
+    date = request.args.get("date")
 
     try:
         call = db.session.query(Call).filter_by(id=id_call).first()
@@ -269,10 +264,10 @@ def frequencia_lista(id_call):
         students = []
         for f in call.frequencies:
             dist=None
-            if f.location and call.location:
+            if f.coordinate and call.coordinate:
                 dist = get_distance(
-                    (f.location["latitude"], f.location["longitude"]),
-                    (call.location["latitude"], call.location["longitude"])
+                    f.coordinate.split(','),
+                    call.coordinate.split(',')
                 )
             students.append((
                 db.session.query(User).filter_by(id=f.id_user).first(),
@@ -283,13 +278,12 @@ def frequencia_lista(id_call):
         flash("Error listing frequencies", "danger")
         return redirect(url_for("call_app.home"))
 
-    dia = datetime.datetime.strptime(dia.split(" ")[0], "%Y-%m-%d")
-    return render_template("rollcall/lista.jinja2", students=students, dia=dia.strftime("%d/%m/%Y"), id_call=id_call)
+    return render_template("rollcall/list.jinja2", students=students, date=date, id_call=id_call)
 
 
-@call_app.route("/frequencies/<int:id_call>/student/<int:id_user>/rejeitar", methods=["GET"])
+@call_app.route("/frequencies/<int:id_call>/student/<int:id_user>/reject", methods=["GET"])
 @login_required
-def frequencias_rejeitar(id_call, id_user):
+def frequency_reject(id_call, id_user):
     try:
         frequencias_list = db.session.query(Frequency).filter_by(id_user=id_user, id_call=id_call).all()
         

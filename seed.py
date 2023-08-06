@@ -1,4 +1,4 @@
-
+import datetime
 users = [
     {"register": 100000000, "name": "prof1", "password": "1234", "role": "PROFESSOR"},
     {"register": 200000000, "name": "prof2", "password": "1234", "role": "PROFESSOR"},
@@ -19,4 +19,11 @@ userclass = [
     {"register": 111111111, "slug": "class02"},
 ]
 
-# TODO: call, frequency, userclass
+rollscall = [
+    {"date": datetime.datetime(2023, 1, 1), "slug": "class01", "coordinate": "-0.4312401,51.5281798"},
+    {"date": datetime.datetime(2023, 1, 2), "slug": "class02", "coordinate": "-74.3093351,40.6970193"},
+    {"date": datetime.datetime(2023, 1, 3), "slug": "class01", "coordinate": "-0.4312401,51.5281798"},
+    {"date": datetime.datetime(2023, 1, 4), "slug": "class02", "coordinate": "-74.3093351,40.6970193"},
+]
+
+# TODO: call, frequency

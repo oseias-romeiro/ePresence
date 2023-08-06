@@ -7,13 +7,14 @@ if ("geolocation" in navigator) {
             lat.value = position.coords.latitude;
             lon.value = position.coords.longitude;
 
-            console.log(lat, lon);
+            console.log(lat.value, lon.value);
+            alert("Location getted :D");
         },
         (err) => {
             console.log(err.message);
-            alert("Erro ao obter localização!");
+            alert("Error get location!");
         }
     );
 } else {
-    alert("Navegador não suporta geolocalização!");
+    alert("Browser not support location!");
 }

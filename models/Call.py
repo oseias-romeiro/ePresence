@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy import ForeignKey, UniqueConstraint, JSON, String
+from sqlalchemy import ForeignKey, UniqueConstraint, JSON, String, ARRAY, Float
 
 from models.User import User
 from app import db
@@ -10,12 +10,12 @@ class Call(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     date: Mapped[datetime] = mapped_column(nullable=False)
-    id_class: Mapped[int] = mapped_column(ForeignKey("class.id"))
-    location: Mapped[dict] = mapped_column(JSON, nullable=True)
+    slug: Mapped[int] = mapped_column(ForeignKey("class.slug"))
+    coordinate: Mapped[str] = mapped_column(String, nullable=True)
 
-    __table_args__ = (UniqueConstraint(date, id_class, name="constDateClass"),)
+    __table_args__ = (UniqueConstraint(date, slug, name="constDateClass"),)
 
-    f_class: Mapped["Class"] = relationship(foreign_keys="Call.id_class")
+    f_class: Mapped["Class"] = relationship(foreign_keys="Call.slug")
 
     frequencies:  Mapped[list["Frequency"]] = relationship(back_populates="call")
 
@@ -26,7 +26,7 @@ class Frequency(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     id_user: Mapped[int] = mapped_column(ForeignKey("users.id"))
     id_call: Mapped[int] = mapped_column(ForeignKey("calls.id"))
-    location: Mapped[dict] = mapped_column(JSON, nullable=True)
+    coordinate: Mapped[str] = mapped_column(String, nullable=True)
 
     __table_args__ = (UniqueConstraint(id_user, id_call, name="constUserCall"),)
 

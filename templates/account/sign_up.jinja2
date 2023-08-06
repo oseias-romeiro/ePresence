@@ -3,9 +3,9 @@
 {% block content %}
     
     <div class="d-flex justify-content-center">
-        <form method="post" autocomplete="off" style="width: 500px;">
-            <h2 style="text-align: center;">{% block title %}Register{% endblock %}</h2>
-
+        <form method="post" autocomplete="off" class="form">
+            <h2 class="text-center">{% block title %}Sign up{% endblock %}</h2>
+            <hr>
             {{ form.csrf_token }}
 
             {{ form.name.label }}
@@ -20,11 +20,9 @@
             {{ form.role.label }}: {{ form.role(class_="form-select") }}<br>
 
             <br>
-            <div style="text-align: center;">
-                <button class="btn btn-primary" type="submit">Done</button>
-                <a href="{{ url_for('account_app.sign_in') }}">
-                    <button class="btn btn-secondary" type="button" class="btn-cancel">Cancel</button>
-                </a>
+            <div class="text-center">
+                <button style="width: 40%;" class="btn btn-success" type="submit">Done</button>
+                <a style="width: 40%;" href="{{ url_for('account_app.sign_in') }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>
