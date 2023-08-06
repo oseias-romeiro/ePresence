@@ -4,7 +4,7 @@
     
     <div class="d-flex justify-content-center">
         <form class="form" method="post" autocomplete="off">
-            <h2>{% block title %}Edit{% endblock %} profile</h2>
+            <h2>{% block title %}Profile{% endblock %}</h2>
             <br>
             {{ form.csrf_token }}
 
@@ -20,13 +20,9 @@
             {{ form.role.label }}: {{ form.role(class_="form-select") }}<br>
 
             <br>
-            <div class="row">
-                <div class="col">
-                    <button class="btn btn-success" type="submit">Edit</button>
-                </div>
-                <div class="col">
-                    <a href="{{ url_for('call_app.home') }}" class="btn btn-dark" type="button" class="btn-cancel">Cancel</a>
-                </div>
+            <div class="text-center">
+                <button class="btn btn-success" style="width: 40%;" type="submit">Edit</button>
+                <a style="width: 40%;" href="{{ url_for('call_app.home') }}" class="btn btn-dark" type="button" class="btn-cancel">Cancel</a>
             </div>
             <br>
         </form>

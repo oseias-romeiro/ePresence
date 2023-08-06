@@ -2,8 +2,8 @@ from flask.cli import AppGroup
 
 from app import db, bcrypt
 from models.User import User
-from models.Call import Class, UserClass, Call
-from seed import users, classes, userclass, rollscall
+from models.Call import Class, UserClass, Call, Frequency
+from seed import users, classes, userclass, rollscall, frequencies
 
 seed_cli = AppGroup("seed")
 
@@ -27,7 +27,13 @@ def seed_userclass():
     db.session.commit()
 
 @seed_cli.command("rollscall")
-def seed_userclass():
+def seed_rollscall():
     for rc in rollscall:
         db.session.add(Call(**rc))
+    db.session.commit()
+
+@seed_cli.command("frequencies")
+def seed_frequencies():
+    for f in frequencies:
+        db.session.add(Frequency(**f))
     db.session.commit()

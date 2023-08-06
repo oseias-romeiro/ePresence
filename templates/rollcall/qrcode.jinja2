@@ -2,14 +2,14 @@
 
 {% block content %}
     <h2>
-        {% block title %}Qrcode{% endblock %}
+        {% block title %}QRcode{% endblock %}
     </h2>
     <ul>
-        <li>O código é valido por 10 minutos!</li>
-        <li>Não é possível retornar a essa página depois</li>
+        <li>The code is valid for 10 minutes!</li>
+        <li>Unable to return to this page when leaving this page</li>
     </ul>
 
-    <img src="{{ url_for('chamada_app.gen_qrcode', id_chamada=id_chamada) }}" style="max-width: 90%;">
+    <img src="{{ url_for('call_app.gen_qrcode', id_call=id_call) }}" style="max-width: 90%;">
     
 
 {% endblock %}

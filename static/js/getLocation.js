@@ -8,7 +8,6 @@ if ("geolocation" in navigator) {
             lon.value = position.coords.longitude;
 
             console.log(lat.value, lon.value);
-            alert("Location getted :D");
         },
         (err) => {
             console.log(err.message);

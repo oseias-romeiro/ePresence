@@ -24,13 +24,13 @@ class Frequency(db.Model):
     __tablename__ = "frequencies"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    id_user: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    register: Mapped[str] = mapped_column(ForeignKey("users.register"))
     id_call: Mapped[int] = mapped_column(ForeignKey("calls.id"))
     coordinate: Mapped[str] = mapped_column(String, nullable=True)
 
-    __table_args__ = (UniqueConstraint(id_user, id_call, name="constUserCall"),)
+    __table_args__ = (UniqueConstraint(register, id_call, name="constUserCall"),)
 
-    user: Mapped["User"] = relationship(foreign_keys="Frequency.id_user")
+    user: Mapped["User"] = relationship(foreign_keys="Frequency.register")
     call: Mapped["Call"] = relationship(foreign_keys="Frequency.id_call")
 
 

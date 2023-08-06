@@ -31,11 +31,11 @@
                         <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ url_for('call_app.class_students', slug=c.slug) }}">Students</a></li>
                         <li><a class="dropdown-item" href="{{ url_for('call_app.class_delete', slug=c.slug) }}">Remove</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('call_app.class_frequency', slug=c.slug) }}">RollsCall</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('call_app.class_frequency', slug=c.slug) }}">Roll Call</a></li>
                         </ul>
                     </div>
                     {% else %}
-                    <a href="{{ url_for('call_app.class_frequency', slug=c.slug) }}">RollsCall</a>
+                    <a href="{{ url_for('call_app.class_frequency', slug=c.slug) }}">Roll Call</a>
                     {% endif %}
                 </div>
             </li>

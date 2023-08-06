@@ -3,7 +3,7 @@
 
 {% block content %}
     <h2>
-        {% block title %}Rolls Call{% endblock %}
+        {% block title %}Roll call{% endblock %}
         
         {% if current_user.role == role.PROFESSOR %}
             <form action="{{ url_for('call_app.call_new', slug=slug)}}" method="post">
@@ -12,7 +12,7 @@
                 <input hidden id="lon" type="text" name="lon">
                 
                 <button style="float: right;" class="btn btn-primary" type="submit">
-                    Add rollscall
+                    Roll call
                 </button>
             </form>
         {% endif %}

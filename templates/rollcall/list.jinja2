@@ -2,7 +2,7 @@
 
 {% block content %}
     <h2>
-        {% block title %}Lista de frequencia{% endblock %} do dia: {{ dia }}
+        {% block title %}Presence list{% endblock %} on {{ date }}
     </h2>
     <br>
     <table class="table">
@@ -18,7 +18,7 @@
                 <td>{{ s[0].name }}</td>
                 <td>{{ s[1] if s[1]!=None else '' }}</td>
                 <td>
-                    <a href="{{ url_for('chamada_app.frequency_reject', id_call=id_call, id_user=s[0].id) }}">Reject</a>
+                    <a href="{{ url_for('call_app.frequency_reject', id_call=id_call, register=s[0].register) }}">Reject</a>
                 </td>
             </tr>
         {% endfor %}

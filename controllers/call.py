@@ -159,7 +159,7 @@ def call_new(slug):
         db.session.add(call)
         db.session.commit()
 
-        return render_template("rollscall/qrcode.jinja2", id_call=call.id)
+        return render_template("rollcall/qrcode.jinja2", id_call=call.id)
         
     except Exception as e:
         print(e)
@@ -238,7 +238,7 @@ def frequency_new(id_call):
             return redirect(url_for("call_app.home"))
 
     freq = Frequency(
-        id_user = current_user.id,
+        register = current_user.register,
         id_call = id_call,
         location = geoloc if geoloc else None
     )
@@ -270,22 +270,23 @@ def frequency_list(id_call):
                     call.coordinate.split(',')
                 )
             students.append((
-                db.session.query(User).filter_by(id=f.id_user).first(),
+                db.session.query(User).filter_by(register=f.register).first(),
                 dist
             ))
         
-    except:
+    except Exception as e:
+        print(e)
         flash("Error listing frequencies", "danger")
         return redirect(url_for("call_app.home"))
 
     return render_template("rollcall/list.jinja2", students=students, date=date, id_call=id_call)
 
 
-@call_app.route("/frequencies/<int:id_call>/student/<int:id_user>/reject", methods=["GET"])
+@call_app.route("/frequencies/<int:id_call>/student/<register>/reject", methods=["GET"])
 @login_required
-def frequency_reject(id_call, id_user):
+def frequency_reject(id_call, register):
     try:
-        frequencias_list = db.session.query(Frequency).filter_by(id_user=id_user, id_call=id_call).all()
+        frequencias_list = db.session.query(Frequency).filter_by(register=register, id_call=id_call).all()
         
         for f in frequencias_list:
             db.session.delete(f)
