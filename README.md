@@ -15,22 +15,27 @@ A aplicação permite que professores criem turmas, adicionem alunos a essas tur
 
 Essa aplicação proporciona uma maneira conveniente e eficiente de gerenciar a presença dos alunos em aulas ou atividades acadêmicas por meio de um sistema online. Ela simplifica o processo de chamada, permitindo aos professores obter rapidamente informações atualizadas sobre a presença dos alunos, além de oferecer aos alunos a facilidade de responder às chamadas por meio do uso de QR Codes.
 
+
+## Setup
+
 ### Env
-Variaveis de ambiente são chamadas em [config.py](./config.py) e podem ser carregadas automaticamente de um arquivo `.env` no diretório raiz do projeto
+Variaveis de ambiente são chamadas em [config.py](./config.py) e podem ser carregadas automaticamente de um arquivo `.env` no diretório raiz do projeto.
 
 Exemplo:
 ```sh
-SECRET_KEY=s3cr3t
+SECRET_KEY=s3cr3t # change me
 ENV=development
 FLASK_DEBUG=yes
 ```
 
-## Setup
+> Acima é apenas um exemplo, configure o .env de acordo com as necessidades do seu ambiente
 
 
 ### Dependencias
+Instale as dependencias de acordo com o ambiente
+
 ```sh
-pip install -r requirements.txt
+pip install -r requirements-{ambiente}.txt
 ```
 
 ### database
@@ -52,8 +57,17 @@ flask seed frequencies
 
 ## Execução 
 
+- Desenvolvimento / Teste
+
 ```sh
-gunicorn -b "0.0.0.0:5000" wsgi:app
+flask run
+```
+> acesse: [localhost:5000](http://localhost:5000)
+
+- Produção:
+
+```sh
+gunicorn -b "0.0.0.0:80" wsgi:app
 ```
 
-Acesse: [localhost:5000](http://localhost:5000)
+> Acesse: [localhost](http://localhost)

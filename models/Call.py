@@ -10,8 +10,8 @@ class Call(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     date: Mapped[datetime] = mapped_column(nullable=False)
-    slug: Mapped[int] = mapped_column(ForeignKey("class.slug"))
-    coordinate: Mapped[str] = mapped_column(String, nullable=True)
+    slug: Mapped[int] = mapped_column(ForeignKey("classes.slug"))
+    coordinate: Mapped[str] = mapped_column(String(30), nullable=True)
 
     __table_args__ = (UniqueConstraint(date, slug, name="constDateClass"),)
 
@@ -26,7 +26,7 @@ class Frequency(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     register: Mapped[str] = mapped_column(ForeignKey("users.register"))
     id_call: Mapped[int] = mapped_column(ForeignKey("calls.id"))
-    coordinate: Mapped[str] = mapped_column(String, nullable=True)
+    coordinate: Mapped[str] = mapped_column(String(30), nullable=True)
 
     __table_args__ = (UniqueConstraint(register, id_call, name="constUserCall"),)
 
@@ -35,7 +35,7 @@ class Frequency(db.Model):
 
 
 class Class(db.Model):
-    __tablename__ = "class"
+    __tablename__ = "classes"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(127), nullable=False)
@@ -50,7 +50,7 @@ class UserClass(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     register: Mapped[int] = mapped_column(ForeignKey("users.register"))
-    slug: Mapped[str] = mapped_column(ForeignKey("class.slug"))
+    slug: Mapped[str] = mapped_column(ForeignKey("classes.slug"))
 
     user: Mapped["User"] = relationship(foreign_keys="UserClass.register")
     f_class: Mapped["Class"] = relationship(foreign_keys="UserClass.slug")
