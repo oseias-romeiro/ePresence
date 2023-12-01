@@ -8,30 +8,33 @@
     <!-- Bootstrap -->
     {{ bootstrap.load_css() }}
 
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="shortcut icon" href="/static/media/icon.png" type="image/png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='media/icon.png') }}" type="image/png">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="/" style="padding-left: 10px;">ePresence</a>
+        <a class="navbar-brand" href="{{ url_for('index') }}" style="padding-left: 10px;">ePresence</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuItems" aria-controls="menuItems" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="menuItems">
             <ul class="navbar-nav" style="padding-left: 10px;">
-                <li class="nav-item">
-                    <a class="nav-link" href="/home">Home</a>
-                </li>
                 {% if not current_user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/account/sign_in">Login</a>
+                    <a class="nav-link" href="{{ url_for('account_app.sign_in') }}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('account_app.sign_up') }}">Create account</a>
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/account/profile">Profile</a>
+                    <a class="nav-link" href="{{ url_for('call_app.home') }}">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/account/logout">Logout</a>
+                    <a class="nav-link" href="{{ url_for('account_app.profile') }}">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('account_app.log_out') }}">Logout</a>
                 </li>
                 {% endif %}
             </ul>
@@ -61,6 +64,6 @@
     <!-- Bootstrap -->
     {{ bootstrap.load_js() }}
 
-    <script src="/static/js/app.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

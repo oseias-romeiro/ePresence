@@ -27,6 +27,12 @@ FLASK_DEBUG=yes
 
 ## Setup
 
+
+### Dependencias
+```sh
+pip install -r requirements.txt
+```
+
 ### database
 ```sh
 flask db init
@@ -47,7 +53,6 @@ flask seed frequencies
 ## Execução 
 
 ```sh
-pip install -r requirements.txt
 gunicorn -b "0.0.0.0:5000" wsgi:app
 ```
 

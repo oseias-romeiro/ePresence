@@ -9,8 +9,8 @@ from flask_migrate import Migrate
 
 from config import get_config
 
-
-app = Flask(__name__)
+BASE_ROUTE = ""
+app = Flask(__name__, static_url_path=BASE_ROUTE+"/static")
 
 # configs
 config = get_config()
@@ -31,13 +31,13 @@ from cli_cmds import seed_cli
 from controllers import account, call
 
 # blueprints
-app.register_blueprint(account.account_app, url_prefix="/account")
-app.register_blueprint(call.call_app, url_prefix="/")
+app.register_blueprint(account.account_app, url_prefix=BASE_ROUTE+"/account")
+app.register_blueprint(call.call_app, url_prefix=BASE_ROUTE+"/")
 
 # cli
 app.cli.add_command(seed_cli)
 
-@app.route("/", methods=["GET"])
+@app.route(BASE_ROUTE+"/", methods=["GET"])
 def index():
     return render_template("index.jinja2")
 
