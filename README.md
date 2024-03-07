@@ -2,7 +2,7 @@
 
 Projeto de Engenharia de Software: Proposta de solução para uma versão eletrônica e colaborativa/descentralizada da chamada de presença.
 
-- Experimente: [epresence.oseiasromeiro.repl.co](https://epresence.oseiasromeiro.repl.co)
+- Experimente: [oseias-romeiro.alwaysdata.net/epresence](http://oseias-romeiro.alwaysdata.net/epresence/)
 - Template: [oseias-romeiro/flask_template](https://github.com/oseias-romeiro/flask_template)
 
 ![screenshot](./static/media/screenshot.png)
