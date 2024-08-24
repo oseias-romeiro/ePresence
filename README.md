@@ -2,10 +2,11 @@
 
 Projeto de Engenharia de Software: Proposta de solução para uma versão eletrônica e colaborativa/descentralizada da chamada de presença.
 
-- Experimente: [oseias-romeiro.alwaysdata.net/epresence](http://oseias-romeiro.alwaysdata.net/epresence/)
 - Template: [oseias-romeiro/flask_template](https://github.com/oseias-romeiro/flask_template)
 
-![screenshot](./static/media/screenshot.png)
+![professor view](./docs/professor.gif)
+
+![student view](./docs/student.gif)
 
 ## Descrição
 
@@ -40,8 +41,6 @@ pip install -r requirements-{ambiente}.txt
 
 ### database
 ```sh
-flask db init
-flask db migrate -m "init"
 flask db upgrade
 ```
 
@@ -62,7 +61,7 @@ flask seed frequencies
 ```sh
 flask run
 ```
-> acesse: [localhost:5000](http://localhost:5000)
+> Acesse: [localhost:5000](http://localhost:5000)
 
 - Produção:
 

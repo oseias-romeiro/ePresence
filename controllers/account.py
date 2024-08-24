@@ -89,7 +89,6 @@ def profile_edit():
             user = db.session.query(User).filter_by(id=current_user.id).first()
             user.name=form.name.data
             user.password=bcrypt.generate_password_hash(form.password1.data)
-            user.role=form.role.data
             db.session.commit()
 
             flash("User edited", "success")

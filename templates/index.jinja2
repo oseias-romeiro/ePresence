@@ -2,25 +2,27 @@
 
 {% block content %}
 
-<div class="card d-flex justify-content-center align-items-center" style="background-color: rgba(0, 0, 0, 0.702); padding: 20px;">
-    <div class="text-center text-white">
-        <h1>{% block title %}ePresence{% endblock %}</h1>
-        <br>
-        <img class="img-fluid rounded float-left" src="{{ url_for('static', filename='media/digital_education.jpg') }}">
-        <br><br>
-        <h5 class="d-flex justify-content-center">Welcome to the future of virtual education with ePresence, the cutting-edge web roll call system designed to streamline attendance tracking in online classes! As the world of education rapidly evolves, we understand the importance of fostering engagement and accountability in virtual learning environments. That's why we've created ePresence - a user-friendly and efficient solution to mark attendance in online classes effortlessly.</h5>
-        <br>
-        <a style="min-width: 140px;" class="btn btn-light" href="{{ url_for('account_app.sign_in') }}">Login</a>
-        <a class="btn btn-light" href="{{ url_for('account_app.sign_up') }}">Create Account</a>
+<div class="d-flex justify-content-center align-items-center" style="margin-bottom: 60px;">
+    <div class="card p-4" style="background-color: rgba(0, 0, 0, 0.702); max-width: 700px;">
+        <div class="text-center text-white">
+            <h1>{% block title %}ePresence{% endblock %}</h1>
+            <br>
+            <h5>Welcome to the future of virtual education with ePresence, the cutting-edge web roll call system designed to streamline attendance tracking in online classes! As the world of education rapidly evolves, we understand the importance of fostering engagement and accountability in virtual learning environments. That's why we've created ePresence - a user-friendly and efficient solution to mark attendance in online classes effortlessly.</h5>
+            <br>
+
+            <a style="min-width: 140px;" class="btn btn-light mt-2" href="{{ url_for('account_app.sign_in') }}">Login</a>
+            <a class="btn btn-light mt-2" href="{{ url_for('account_app.sign_up') }}">Create Account</a>
+        </div>
     </div>
 </div>
-<br><br><br>
 
 <style>
     body {
-        background-image: url("{{ url_for('static', filename='media/rollcall.png') }}");
+        background-image: url("{{ url_for('static', filename='media/back.png') }}");
         background-repeat: no-repeat;
         background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
     }
 </style>
 

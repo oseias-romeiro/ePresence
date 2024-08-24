@@ -13,7 +13,7 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")# mysql://user@localhost/foo
 
 class DevelopmentConfig(Config):
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(basedir, 'db.sqlite')}"
+    SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(basedir, 'db.sqlite3')}"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 class TestingConfig(Config):

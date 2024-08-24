@@ -10,6 +10,7 @@ from models.Call import Call, Frequency, Class, UserClass
 from help.required import prof_required
 from forms.ClassForm import ClassForm, JoinStudent
 from api.GeoDB import get_nearby_cities, get_distance
+from flask_wtf.csrf import generate_csrf
 
 call_app = Blueprint("call_app", __name__)
 
@@ -215,8 +216,8 @@ def class_frequency(slug):
 @login_required
 def frequency_confirm(id_call):
     expiration = request.args.get("expiration")
-
-    return render_template("rollcall/confirm_frequencia.jinja2", expiration=expiration, id_call=id_call)
+    csrf_token = generate_csrf()
+    return render_template("rollcall/confirm_frequencia.jinja2", expiration=expiration, id_call=id_call, csrf_token=csrf_token)
     
 
 @call_app.route("/frequencies/<int:id_call>/new", methods=["POST"])
@@ -232,15 +233,15 @@ def frequency_new(id_call):
         geoloc = get_nearby_cities(lat,lon)
 
     if expiration is not None:
-        expiration = datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
-        if datetime.now() > expiration:
+        expiration = datetime.datetime.strptime(expiration, "%Y-%m-%d %H:%M:%S.%f")
+        if datetime.datetime.now() > expiration:
             flash("Code expired", "danger")
             return redirect(url_for("call_app.home"))
 
     freq = Frequency(
         register = current_user.register,
         id_call = id_call,
-        location = geoloc if geoloc else None
+        coordinate = f"{lat},{lon}" if lat and lon else None
     )
     try:
         db.session.add(freq)

@@ -7,8 +7,7 @@ venv/
 .vscode/**
 
 # Database
-migrations/
-db.sqlite
+db.sqlite3
 
 # Config files
 .env

@@ -24,7 +24,7 @@
                     <a class="nav-link" href="{{ url_for('account_app.sign_in') }}">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('account_app.sign_up') }}">Create account</a>
+                    <a class="nav-link" href="{{ url_for('account_app.sign_up') }}">Create Account</a>
                 </li>
                 {% else %}
                 <li class="nav-item">
@@ -39,6 +39,9 @@
                 {% endif %}
             </ul>
         </div>
+        {% if current_user.is_authenticated %}
+        <span class="text-light mx-4">hello, {{ current_user.register }}.</span>
+        {% endif %}
     </nav>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
